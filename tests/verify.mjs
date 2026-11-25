@@ -29,9 +29,10 @@ const EXPECTED_PLASMOIDS = [
   "dev.danny.nordic.windowtitle",
   "dev.danny.nordic.clock",
   "dev.danny.nordic.sysstat",
+  "dev.danny.nordic.dock",
 ];
 
-test("all 4 Plasma 6 plasmoids have valid metadata.json and QML entrypoint", () => {
+test("all 5 Plasma 6 plasmoids have valid metadata.json and QML entrypoint", () => {
   for (const id of EXPECTED_PLASMOIDS) {
     const dir = join(ROOT, "plasmoids", id);
     const metaPath = join(dir, "metadata.json");
@@ -274,8 +275,7 @@ test("Global Theme desktop-layout.js builds top floating bar + bottom autohide f
   assert.equal(dock.lengthMode, "fit");
   assert.equal(dock.hiding, "autohide");
   assert.equal(dock.opacity, "translucent");
-  assert.deepEqual(dock._widgets.map((w) => w.type), ["org.kde.plasma.icontasks"]);
-  assert.equal(dock._widgets[0]._cfg["General:fill"], false);
+  assert.deepEqual(dock._widgets.map((w) => w.type), ["dev.danny.nordic.dock"]);
   assert.equal(dock._widgets[0]._cfg["General:launchers"], preservedList);
 
   const res2 = runLayoutWithInitialPanels([]);

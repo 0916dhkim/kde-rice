@@ -1,0 +1,20 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "0916dhkim@gmail.com",
+                "Name": "Danny Kim"
+            }
+        ],
+        "Category": "Windows and Tasks",
+        "Description": "Compact Nordic floating app dock with animated frost-teal indicators, drag-and-drop reorder/pinning, and context menu",
+        "Icon": "preferences-desktop-display",
+        "Id": "dev.danny.nordic.dock",
+        "License": "MIT",
+        "Name": "Nordic Dock",
+        "Version": "0.1.0",
+        "Website": "https://github.com/0916dhkim/kde-rice"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

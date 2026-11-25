@@ -15,7 +15,11 @@
             const widgets = existingPanels[i].widgets();
             for (let j = 0; j < widgets.length; ++j) {
                 const w = widgets[j];
-                if (w.type === "org.kde.plasma.icontasks" || w.type === "org.kde.plasma.taskmanager") {
+                if (
+                    w.type === "dev.danny.nordic.dock" ||
+                    w.type === "org.kde.plasma.icontasks" ||
+                    w.type === "org.kde.plasma.taskmanager"
+                ) {
                     w.currentConfigGroup = ["General"];
                     const saved = w.readConfig("launchers", "");
                     if (saved && String(saved).trim().length > 0) {
@@ -97,12 +101,8 @@
         dock.opacity = "translucent";
     }
 
-    const tasks = dock.addWidget("org.kde.plasma.icontasks");
+    const tasks = dock.addWidget("dev.danny.nordic.dock");
     tasks.currentConfigGroup = ["General"];
-    tasks.writeConfig("fill", false);
-    tasks.writeConfig("showOnlyCurrentDesktop", false);
-    tasks.writeConfig("showOnlyCurrentScreen", false);
-    tasks.writeConfig("groupingStrategy", 1);
     tasks.writeConfig("launchers", preservedLaunchers);
 
     // Ensure desktops keep the standard image wallpaper plugin (matches Breeze look-and-feel).
