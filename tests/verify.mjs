@@ -358,15 +358,9 @@ test("nordic-icons overlay theme has valid index.theme, SVGs, and zero broken sy
   assert.ok(links >= 100, `expected >= 100 alias symlinks, got ${links}`);
 });
 
-test("bundled Manrope fonts and SIL OFL 1.1 license are present", () => {
+test("bundled Manrope variable font and SIL OFL 1.1 license are present", () => {
   const fontDir = join(ROOT, "fonts/manrope");
-  for (const f of [
-    "Manrope-Regular.ttf",
-    "Manrope-Medium.ttf",
-    "Manrope-SemiBold.ttf",
-    "Manrope-Bold.ttf",
-    "OFL.txt",
-  ]) {
+  for (const f of ["Manrope.ttf", "OFL.txt"]) {
     assert.ok(existsSync(join(fontDir, f)), `missing ${f}`);
   }
   const ofl = readFileSync(join(fontDir, "OFL.txt"), "utf8");
