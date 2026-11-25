@@ -177,10 +177,10 @@
   <rect id="floating-hint-left-margin" x="68" y="138" width="10" height="4" fill="#88c0d0"/>
   <rect id="floating-hint-right-margin" x="82" y="138" width="10" height="4" fill="#88c0d0"/>
 
-  <!-- Thick panel hints -->
+  <!-- Thick panel hints (4px so fit-content 58px dock keeps tight ~10px outer margins) -->
   <rect id="thick-center" x="110" y="138" width="32" height="32" fill="#141a24" fill-opacity="0.74"/>
-  <rect id="thick-hint-top-margin" x="150" y="138" width="4" height="6" fill="#a3be8c"/>
-  <rect id="thick-hint-bottom-margin" x="158" y="138" width="4" height="6" fill="#a3be8c"/>
-  <rect id="thick-hint-left-margin" x="166" y="138" width="10" height="4" fill="#a3be8c"/>
-  <rect id="thick-hint-right-margin" x="180" y="138" width="10" height="4" fill="#a3be8c"/>
+  <rect id="thick-hint-top-margin" x="150" y="138" width="4" height="4" fill="#a3be8c"/>
+  <rect id="thick-hint-bottom-margin" x="158" y="138" width="4" height="4" fill="#a3be8c"/>
+  <rect id="thick-hint-left-margin" x="166" y="138" width="4" height="4" fill="#a3be8c"/>
+  <rect id="thick-hint-right-margin" x="174" y="138" width="4" height="4" fill="#a3be8c"/>
 </svg>

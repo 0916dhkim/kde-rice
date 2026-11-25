@@ -14,6 +14,14 @@ PlasmoidItem {
     preferredRepresentation: fullRepresentation
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
 
+    // Option A exact vertical geometry inside a 58px panel (4px panel SVG top/bottom margins -> 50px inner):
+    // 5px inner top (+4px panel = 9px) | 36px squircle (y=5..41, center=23) | 4px gap | 3px pill (y=45..48) | 2px inner bottom (+4px panel = 6px)
+    readonly property int innerHeight: 50
+    readonly property int squircleSize: 36
+    readonly property int squircleTopY: 5
+    readonly property int indicatorY: 45
+    readonly property int dividerHeight: 26
+
     property int dragFromIndex: -1
     property bool syncingLaunchers: false
 
@@ -103,8 +111,9 @@ PlasmoidItem {
 
     fullRepresentation: Item {
         id: dockRoot
-        implicitWidth: Math.max(44, iconsRow.implicitWidth + 4)
-        implicitHeight: 46
+        // Zero redundant horizontal padding — panel SVG + containment provide clean ~10px outer margins
+        implicitWidth: Math.max(root.squircleSize, iconsRow.implicitWidth)
+        implicitHeight: root.innerHeight
         Layout.minimumWidth: implicitWidth
         Layout.preferredWidth: implicitWidth
         Layout.fillHeight: true
@@ -129,7 +138,6 @@ PlasmoidItem {
 
         Rectangle {
             anchors.fill: parent
-            anchors.margins: 1
             radius: 10
             color: Qt.rgba(136 / 255, 192 / 255, 208 / 255, 0.10)
             border.width: 1
@@ -173,16 +181,20 @@ PlasmoidItem {
                     spacing: 8
                     Layout.alignment: Qt.AlignVCenter
 
-                    // Vertical divider between pinned apps and unpinned running apps
-                    Rectangle {
+                    // Vertical divider vertically dead-center aligned with the 36x36 squircle icons
+                    Item {
                         visible: slotWrap.showLeadingDivider
-                        implicitWidth: 1
-                        implicitHeight: 26
-                        color: Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.16)
+                        implicitWidth: 5
+                        implicitHeight: root.innerHeight
                         Layout.alignment: Qt.AlignVCenter
-                        Layout.leftMargin: 2
-                        Layout.rightMargin: 2
-                        Layout.bottomMargin: 4
+
+                        Rectangle {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            y: root.squircleTopY + Math.round((root.squircleSize - root.dividerHeight) / 2)
+                            width: 1
+                            height: root.dividerHeight
+                            color: Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.18)
+                        }
                     }
 
                     PlasmaCore.ToolTipArea {
@@ -202,8 +214,8 @@ PlasmoidItem {
                             return "";
                         }
 
-                        implicitWidth: 38
-                        implicitHeight: 45
+                        implicitWidth: root.squircleSize
+                        implicitHeight: root.innerHeight
                         Layout.alignment: Qt.AlignVCenter
                         opacity: slotWrap.isDraggingThis ? 0.55 : 1.0
 
@@ -211,27 +223,27 @@ PlasmoidItem {
                             NumberAnimation { duration: 100 }
                         }
 
-                        // Uniform dark Nordic squircle background card for every dock icon
+                        // Uniform 36x36 dark Nordic squircle background card
                         Rectangle {
                             id: tileBg
                             anchors.horizontalCenter: parent.horizontalCenter
-                            y: 1
-                            width: 36
-                            height: 36
+                            y: root.squircleTopY
+                            width: root.squircleSize
+                            height: root.squircleSize
                             radius: 10
                             color: {
                                 if (slotWrap.isActive) {
-                                    return Qt.rgba(52 / 255, 68 / 255, 88 / 255, 0.72);
+                                    return Qt.rgba(52 / 255, 68 / 255, 88 / 255, 0.74);
                                 }
                                 if (tileMouse.containsMouse) {
                                     return Qt.rgba(54 / 255, 66 / 255, 84 / 255, 0.65);
                                 }
-                                return Qt.rgba(38 / 255, 47 / 255, 62 / 255, 0.52);
+                                return Qt.rgba(38 / 255, 47 / 255, 62 / 255, 0.54);
                             }
                             border.width: 1
                             border.color: {
                                 if (slotWrap.isActive) {
-                                    return Qt.rgba(136 / 255, 192 / 255, 208 / 255, 0.52);
+                                    return Qt.rgba(136 / 255, 192 / 255, 208 / 255, 0.54);
                                 }
                                 if (tileMouse.containsMouse) {
                                     return Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.22);
@@ -263,12 +275,11 @@ PlasmoidItem {
                             }
                         }
 
-                        // Compact animated pill indicator cleanly below the squircle card
+                        // Compact animated pill indicator (4px gap below squircle, 6px total above dock edge)
                         Rectangle {
                             id: indicator
                             anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.bottom: parent.bottom
-                            anchors.bottomMargin: 1
+                            y: root.indicatorY
                             height: 3
                             radius: 1.5
                             visible: slotWrap.isRunning
@@ -329,7 +340,7 @@ PlasmoidItem {
                                 }
                                 if (dragged && root.dragFromIndex >= 0) {
                                     const pt = mapToItem(iconsRow, mouse.x, iconsRow.height / 2);
-                                    const slotWidth = 38 + iconsRow.spacing;
+                                    const slotWidth = root.squircleSize + iconsRow.spacing;
                                     const targetIdx = Math.max(
                                         0,
                                         Math.min(tasksModel.count - 1, Math.floor(pt.x / slotWidth))

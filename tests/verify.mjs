@@ -269,7 +269,7 @@ test("Global Theme desktop-layout.js builds top floating bar + bottom autohide f
   }
 
   assert.equal(dock.location, "bottom");
-  assert.equal(dock.height, 54);
+  assert.equal(dock.height, 58);
   assert.equal(dock.floating, true);
   assert.equal(dock.alignment, "center");
   assert.equal(dock.lengthMode, "fit");

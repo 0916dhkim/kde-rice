@@ -92,7 +92,7 @@
     // 2. Centered Floating Nordic Bottom App Dock (autohide overlay; windows do not avoid it)
     const dock = new Panel();
     dock.location = "bottom";
-    dock.height = 54;
+    dock.height = 58;
     dock.floating = true;
     dock.alignment = "center";
     dock.lengthMode = "fit";
