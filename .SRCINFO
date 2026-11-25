@@ -5,6 +5,7 @@ pkgbase = kde-rice-git
 	url = https://github.com/0916dhkim/kde-rice
 	arch = any
 	license = MIT
+	license = OFL-1.1
 	makedepends = git
 	depends = plasma-workspace
 	depends = plasma-desktop

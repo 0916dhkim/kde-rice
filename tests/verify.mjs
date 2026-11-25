@@ -76,6 +76,8 @@ test("Global Theme (look-and-feel) and Wallpaper KPackages are valid", () => {
   const defaults = readFileSync(join(lnfDir, "contents/defaults"), "utf8");
   assert.match(defaults, /widgetStyle=Breeze/);
   assert.match(defaults, /ColorScheme=NordicMinimal/);
+  assert.match(defaults, /font=Manrope,/);
+  assert.match(defaults, /activeFont=Manrope,/);
   assert.match(defaults, /Theme=nordic-icons/);
   assert.match(defaults, /name=nordic-glass/);
   assert.match(defaults, /Image=NordicMist/);
@@ -356,16 +358,33 @@ test("nordic-icons overlay theme has valid index.theme, SVGs, and zero broken sy
   assert.ok(links >= 100, `expected >= 100 alias symlinks, got ${links}`);
 });
 
+test("bundled Manrope fonts and SIL OFL 1.1 license are present", () => {
+  const fontDir = join(ROOT, "fonts/manrope");
+  for (const f of [
+    "Manrope-Regular.ttf",
+    "Manrope-Medium.ttf",
+    "Manrope-SemiBold.ttf",
+    "Manrope-Bold.ttf",
+    "OFL.txt",
+  ]) {
+    assert.ok(existsSync(join(fontDir, f)), `missing ${f}`);
+  }
+  const ofl = readFileSync(join(fontDir, "OFL.txt"), "utf8");
+  assert.match(ofl, /SIL OPEN FONT LICENSE Version 1\.1/);
+});
+
 test("PKGBUILD and .SRCINFO are valid and consistent", () => {
   const pkgbuild = readFileSync(join(ROOT, "PKGBUILD"), "utf8");
   const srcinfo = readFileSync(join(ROOT, ".SRCINFO"), "utf8");
   execFileSync("bash", ["-n", join(ROOT, "PKGBUILD")], { stdio: "pipe" });
 
   assert.match(pkgbuild, /^pkgname=kde-rice-git$/m);
+  assert.match(pkgbuild, /OFL-1\.1/);
   assert.match(pkgbuild, /'kwin-effect-rounded-corners-git'/);
   assert.match(pkgbuild, /git\+https:\/\/github\.com\/0916dhkim\/kde-rice\.git/);
   assert.match(srcinfo, /^pkgbase = kde-rice-git$/m);
   assert.match(srcinfo, /^pkgname = kde-rice-git$/m);
+  assert.match(srcinfo, /\tlicense = OFL-1\.1$/m);
   assert.match(srcinfo, /\tdepends = kwin-effect-rounded-corners-git$/m);
   assert.match(srcinfo, /source = kde-rice::git\+https:\/\/github\.com\/0916dhkim\/kde-rice\.git/);
 });

@@ -3,6 +3,13 @@ widgetStyle=Breeze
 
 [kdeglobals][General]
 ColorScheme=NordicMinimal
+font=Manrope,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+smallestReadableFont=Manrope,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+toolBarFont=Manrope,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+menuFont=Manrope,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+
+[kdeglobals][WM]
+activeFont=Manrope,10,-1,5,500,0,0,0,0,0,0,0,0,0,0,1
 
 [kdeglobals][Icons]
 Theme=nordic-icons

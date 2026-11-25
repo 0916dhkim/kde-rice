@@ -5,7 +5,7 @@ pkgrel=1
 pkgdesc="Nordic Minimal Plasma 6 Global Theme, plasmoids, frosted glass style, and autohide dock layout"
 arch=('any')
 url="https://github.com/0916dhkim/kde-rice"
-license=('MIT')
+license=('MIT' 'OFL-1.1')
 depends=(
     'plasma-workspace'
     'plasma-desktop'
@@ -50,6 +50,10 @@ package() {
     # Nordic Icons overlay theme (inherits breeze-dark)
     install -d "$pkgdir/usr/share/icons"
     cp -a icons/nordic-icons "$pkgdir/usr/share/icons/"
+
+    # Bundled Manrope UI font (SIL OFL 1.1)
+    install -Dm644 fonts/manrope/Manrope-*.ttf -t "$pkgdir/usr/share/fonts/nordic-manrope/"
+    install -Dm644 fonts/manrope/OFL.txt "$pkgdir/usr/share/licenses/$pkgname/OFL-Manrope.txt"
 
     # KWin 6 borderless windows script + system-wide XDG kwinrc defaults (rounded corners + outlines + shadows)
     install -d "$pkgdir/usr/share/kwin/scripts"
