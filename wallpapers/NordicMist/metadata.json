@@ -1,0 +1,13 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "0916dhkim@gmail.com",
+                "Name": "Danny Kim"
+            }
+        ],
+        "Id": "NordicMist",
+        "License": "MIT",
+        "Name": "Nordic Mist"
+    }
+}

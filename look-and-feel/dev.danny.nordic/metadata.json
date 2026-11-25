@@ -1,0 +1,18 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "0916dhkim@gmail.com",
+                "Name": "Danny Kim"
+            }
+        ],
+        "Category": "",
+        "Description": "Nordic Minimal dark frosted top bar and floating autohide bottom dock for KDE Plasma 6",
+        "Id": "dev.danny.nordic",
+        "License": "MIT",
+        "Name": "Nordic Minimal",
+        "Version": "0.1.0",
+        "Website": "https://github.com/0916dhkim/kde-rice"
+    }
+}

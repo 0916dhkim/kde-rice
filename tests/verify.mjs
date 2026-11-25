@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
@@ -65,6 +64,25 @@ test("nordic-glass desktop theme metadata, plasmarc, and colors are valid", () =
   assert.match(colors, /DecorationFocus=136,192,208/);
 });
 
+test("Global Theme (look-and-feel) and Wallpaper KPackages are valid", () => {
+  const lnfDir = join(ROOT, "look-and-feel/dev.danny.nordic");
+  const lnfMeta = JSON.parse(readFileSync(join(lnfDir, "metadata.json"), "utf8"));
+  assert.equal(lnfMeta.KPackageStructure, "Plasma/LookAndFeel");
+  assert.equal(lnfMeta.KPlugin?.Id, "dev.danny.nordic");
+
+  const defaults = readFileSync(join(lnfDir, "contents/defaults"), "utf8");
+  assert.match(defaults, /ColorScheme=NordicMinimal/);
+  assert.match(defaults, /name=nordic-glass/);
+  assert.match(defaults, /Image=NordicMist/);
+
+  assert.ok(existsSync(join(lnfDir, "contents/previews/preview.png")));
+  assert.ok(existsSync(join(lnfDir, "contents/previews/fullscreenpreview.jpg")));
+
+  const wallMeta = JSON.parse(readFileSync(join(ROOT, "wallpapers/NordicMist/metadata.json"), "utf8"));
+  assert.equal(wallMeta.KPlugin?.Id, "NordicMist");
+  assert.ok(existsSync(join(ROOT, "wallpapers/NordicMist/contents/images/3000x2000.png")));
+});
+
 test("panel-background and dialog SVGs contain required 9-slice, mask, shadow, and floating IDs", () => {
   const nineParts = [
     "topleft", "top", "topright",
@@ -124,15 +142,16 @@ test("tasks.svg contains base and south dock task states", () => {
   assert.ok(ids.has("hint-stretch-borders"));
 });
 
-test("apply-layout.js builds top floating bar + bottom autohide floating dock and preserves launchers", () => {
-  const scriptSrc = readFileSync(join(ROOT, "scripts/apply-layout.js"), "utf8").replace(
-    "__LAUNCHER_ICON__",
-    "/tmp/test-launcher.svg"
+test("Global Theme desktop-layout.js builds top floating bar + bottom autohide floating dock", () => {
+  const scriptSrc = readFileSync(
+    join(ROOT, "look-and-feel/dev.danny.nordic/contents/layouts/org.kde.plasma.desktop-layout.js"),
+    "utf8"
   );
 
   function runLayoutWithInitialPanels(initialPanels) {
     const created = [];
     const removed = [];
+    const desktops = [{ wallpaperPlugin: "" }];
 
     class MockWidget {
       constructor(type, initialCfg = {}) {
@@ -185,12 +204,13 @@ test("apply-layout.js builds top floating bar + bottom autohide floating dock an
     const sandbox = {
       Panel: MockPanel,
       panels: () => oldPanels,
+      currentActivity: () => "act-1",
+      desktopsForActivity: () => desktops,
     };
     vm.runInNewContext(scriptSrc, sandbox);
-    return { created, removed };
+    return { created, removed, desktops };
   }
 
-  // Case 1: preserves existing pinned launchers
   const preservedList = "applications:custom-term.desktop,applications:obsidian.desktop";
   const res1 = runLayoutWithInitialPanels([
     {
@@ -203,6 +223,7 @@ test("apply-layout.js builds top floating bar + bottom autohide floating dock an
 
   assert.deepEqual(res1.removed, ["old-default"]);
   assert.equal(res1.created.length, 2);
+  assert.equal(res1.desktops[0].wallpaperPlugin, "org.kde.image");
 
   const [topBar, dock] = res1.created;
   assert.equal(topBar.location, "top");
@@ -224,15 +245,12 @@ test("apply-layout.js builds top floating bar + bottom autohide floating dock an
       "org.kde.plasma.systemtray",
     ]
   );
-  assert.equal(topBar._widgets[0]._cfg["General:icon"], "/tmp/test-launcher.svg");
-
-  // Ensure no media/now-playing widget is added
-  assert.ok(
-    !topBar._widgets.some((w) => w.type.includes("media")),
-    "top bar must not contain a media/now-playing widget"
+  assert.equal(
+    topBar._widgets[0]._cfg["General:icon"],
+    "/usr/share/plasma/desktoptheme/nordic-glass/icons/nordic-launcher.svg"
   );
+  assert.ok(!topBar._widgets.some((w) => w.type.includes("media")));
 
-  // Verify custom plasmoids match actual repo plasmoids
   for (const w of topBar._widgets) {
     if (w.type.startsWith("dev.danny.")) {
       assert.ok(EXPECTED_PLASMOIDS.includes(w.type), `unknown custom plasmoid ${w.type}`);
@@ -250,60 +268,20 @@ test("apply-layout.js builds top floating bar + bottom autohide floating dock an
   assert.equal(dock._widgets[0]._cfg["General:fill"], false);
   assert.equal(dock._widgets[0]._cfg["General:launchers"], preservedList);
 
-  // Case 2: falls back to defaults when no previous icontasks exist
   const res2 = runLayoutWithInitialPanels([]);
   assert.ok(Array.isArray(res2.created[1]._widgets[0]._cfg["General:launchers"]));
 });
 
-test("shell scripts pass bash -n syntax check", () => {
-  for (const s of ["backup.sh", "restore.sh", "install.sh", "uninstall.sh"]) {
-    execFileSync("bash", ["-n", join(ROOT, "scripts", s)], { stdio: "pipe" });
-  }
-});
+test("PKGBUILD and .SRCINFO are valid and consistent", () => {
+  const pkgbuild = readFileSync(join(ROOT, "PKGBUILD"), "utf8");
+  const srcinfo = readFileSync(join(ROOT, ".SRCINFO"), "utf8");
+  execFileSync("bash", ["-n", join(ROOT, "PKGBUILD")], { stdio: "pipe" });
 
-test("backup -> install (--no-layout) -> uninstall -> restore round-trip works in isolated XDG dirs", () => {
-  const sandbox = mkdtempSync(join(tmpdir(), "kde-rice-test-"));
-  try {
-    const env = {
-      ...process.env,
-      XDG_CONFIG_HOME: join(sandbox, "config"),
-      XDG_DATA_HOME: join(sandbox, "data"),
-      XDG_STATE_HOME: join(sandbox, "state"),
-      KDE_RICE_NO_RELOAD: "1",
-    };
-    mkdirSync(env.XDG_CONFIG_HOME, { recursive: true });
-    writeFileSync(join(env.XDG_CONFIG_HOME, "plasmarc"), "[Theme]\nname=breeze-dark\n", "utf8");
-
-    execFileSync(
-      "bash",
-      [join(ROOT, "scripts/install.sh"), "--no-layout", "--no-colors", "--no-wallpaper"],
-      { env, stdio: "pipe" }
-    );
-
-    for (const id of EXPECTED_PLASMOIDS) {
-      assert.ok(existsSync(join(env.XDG_DATA_HOME, "plasma/plasmoids", id, "metadata.json")));
-    }
-    assert.ok(existsSync(join(env.XDG_DATA_HOME, "plasma/desktoptheme/nordic-glass/widgets/panel-background.svg")));
-    assert.ok(existsSync(join(env.XDG_DATA_HOME, "color-schemes/NordicMinimal.colors")));
-    assert.ok(existsSync(join(env.XDG_DATA_HOME, "wallpapers/nordic-mist.png")));
-    assert.ok(existsSync(join(env.XDG_STATE_HOME, "kde-rice/backups/latest")));
-
-    // Mutate config then restore from backup
-    writeFileSync(join(env.XDG_CONFIG_HOME, "plasmarc"), "[Theme]\nname=nordic-glass\n", "utf8");
-    execFileSync("bash", [join(ROOT, "scripts/restore.sh")], { env, stdio: "pipe" });
-    assert.equal(
-      readFileSync(join(env.XDG_CONFIG_HOME, "plasmarc"), "utf8"),
-      "[Theme]\nname=breeze-dark\n"
-    );
-
-    execFileSync("bash", [join(ROOT, "scripts/uninstall.sh")], { env, stdio: "pipe" });
-    assert.ok(!existsSync(join(env.XDG_DATA_HOME, "plasma/desktoptheme/nordic-glass")));
-    for (const id of EXPECTED_PLASMOIDS) {
-      assert.ok(!existsSync(join(env.XDG_DATA_HOME, "plasma/plasmoids", id)));
-    }
-  } finally {
-    rmSync(sandbox, { recursive: true, force: true });
-  }
+  assert.match(pkgbuild, /^pkgname=kde-rice-git$/m);
+  assert.match(pkgbuild, /git\+https:\/\/github\.com\/0916dhkim\/kde-rice\.git/);
+  assert.match(srcinfo, /^pkgbase = kde-rice-git$/m);
+  assert.match(srcinfo, /^pkgname = kde-rice-git$/m);
+  assert.match(srcinfo, /source = kde-rice::git\+https:\/\/github\.com\/0916dhkim\/kde-rice\.git/);
 });
 
 console.log(`\nAll ${passed} verification checks passed.`);
