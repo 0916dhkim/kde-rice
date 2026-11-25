@@ -45,6 +45,10 @@ package() {
     install -d "$pkgdir/usr/share/wallpapers"
     cp -r wallpapers/NordicMist "$pkgdir/usr/share/wallpapers/"
 
+    # KWin 6 borderless windows script
+    install -d "$pkgdir/usr/share/kwin/scripts"
+    cp -r kwin/scripts/nordic-notitlebar "$pkgdir/usr/share/kwin/scripts/"
+
     # Normalize permissions cleanly for system installation
     find "$pkgdir/usr/share" -type d -exec chmod 755 {} +
     find "$pkgdir/usr/share" -type f -exec chmod 644 {} +

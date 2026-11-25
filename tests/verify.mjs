@@ -79,6 +79,9 @@ test("Global Theme (look-and-feel) and Wallpaper KPackages are valid", () => {
   assert.ok(existsSync(join(lnfDir, "contents/previews/preview.png")));
   assert.ok(existsSync(join(lnfDir, "contents/previews/fullscreenpreview.jpg")));
 
+  const layoutDefaults = readFileSync(join(lnfDir, "contents/layouts/defaults"), "utf8");
+  assert.match(layoutDefaults, /BorderlessMaximizedWindows=true/);
+
   const wallMeta = JSON.parse(readFileSync(join(ROOT, "wallpapers/NordicMist/metadata.json"), "utf8"));
   assert.equal(wallMeta.KPlugin?.Id, "NordicMist");
   assert.ok(existsSync(join(ROOT, "wallpapers/NordicMist/contents/images/3000x2000.png")));
@@ -271,6 +274,52 @@ test("Global Theme desktop-layout.js builds top floating bar + bottom autohide f
 
   const res2 = runLayoutWithInitialPanels([]);
   assert.ok(Array.isArray(res2.created[1]._widgets[0]._cfg["General:launchers"]));
+});
+
+test("KWin 6 nordic-notitlebar script hides titlebars on normal/dialog windows only", () => {
+  const kwinDir = join(ROOT, "kwin/scripts/nordic-notitlebar");
+  const meta = JSON.parse(readFileSync(join(kwinDir, "metadata.json"), "utf8"));
+  assert.equal(meta.KPackageStructure, "KWin/Script");
+  assert.equal(meta.KPlugin?.Id, "nordic-notitlebar");
+  assert.equal(meta.KPlugin?.EnabledByDefault, true);
+  assert.equal(meta["X-Plasma-API"], "javascript");
+
+  const src = readFileSync(join(kwinDir, "contents/code/main.js"), "utf8");
+  let addedHandler = null;
+  const makeWin = (props) => {
+    let fsCb = null;
+    return {
+      noBorder: false,
+      fullScreen: false,
+      fullScreenChanged: { connect: (cb) => { fsCb = cb; } },
+      _triggerFs: (v) => { w.fullScreen = v; if (fsCb) fsCb(); },
+      ...props,
+    };
+  };
+  const normal = makeWin({ normalWindow: true });
+  const dialog = makeWin({ dialog: true });
+  const dock = makeWin({ dock: true, normalWindow: false });
+  const desktop = makeWin({ desktopWindow: true, normalWindow: false });
+  const popup = makeWin({ popupWindow: true, normalWindow: false });
+  const addedNormal = makeWin({ normalWindow: true });
+
+  const sandbox = {
+    workspace: {
+      windowAdded: { connect: (fn) => { addedHandler = fn; } },
+      windowList: () => [normal, dialog, dock, desktop, popup],
+    },
+  };
+  vm.runInNewContext(src, sandbox);
+
+  assert.equal(normal.noBorder, true);
+  assert.equal(dialog.noBorder, true);
+  assert.equal(dock.noBorder, false);
+  assert.equal(desktop.noBorder, false);
+  assert.equal(popup.noBorder, false);
+
+  assert.equal(typeof addedHandler, "function");
+  addedHandler(addedNormal);
+  assert.equal(addedNormal.noBorder, true);
 });
 
 test("PKGBUILD and .SRCINFO are valid and consistent", () => {
