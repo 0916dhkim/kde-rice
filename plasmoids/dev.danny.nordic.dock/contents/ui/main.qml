@@ -40,6 +40,15 @@ PlasmoidItem {
         // qmllint enable missing-property
     }
 
+    function isRowPinned(row: int): bool {
+        if (row < 0 || row >= tasksModel.count) {
+            return false;
+        }
+        const idx = tasksModel.makeModelIndex(row);
+        return Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.IsLauncher))
+            || Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.HasLauncher));
+    }
+
     function activateItem(row: int, isLauncher: bool, isActive: bool, isGroupParent: bool, childCount: int): void {
         const idx = tasksModel.makeModelIndex(row);
         if (isLauncher) {
@@ -47,7 +56,6 @@ PlasmoidItem {
             return;
         }
         if (isGroupParent && childCount > 1) {
-            // Find the currently active child and cycle to the next window in the group
             let activeChild = -1;
             for (let c = 0; c < childCount; ++c) {
                 const cIdx = tasksModel.makeModelIndex(row, c);
@@ -95,13 +103,12 @@ PlasmoidItem {
 
     fullRepresentation: Item {
         id: dockRoot
-        implicitWidth: Math.max(48, iconsRow.implicitWidth + 12)
+        implicitWidth: Math.max(44, iconsRow.implicitWidth + 4)
         implicitHeight: 46
         Layout.minimumWidth: implicitWidth
         Layout.preferredWidth: implicitWidth
         Layout.fillHeight: true
 
-        // External drop target for pinning apps (.desktop / applications: URLs) onto the dock
         DropArea {
             id: externalDrop
             anchors.fill: parent
@@ -120,7 +127,6 @@ PlasmoidItem {
             }
         }
 
-        // Subtle frost-teal highlight when dragging an external app over the dock to pin
         Rectangle {
             anchors.fill: parent
             anchors.margins: 1
@@ -134,240 +140,273 @@ PlasmoidItem {
         RowLayout {
             id: iconsRow
             anchors.centerIn: parent
-            spacing: 6
+            spacing: 8
 
             Repeater {
                 id: taskRepeater
                 model: tasksModel
 
-                delegate: PlasmaCore.ToolTipArea {
-                    id: taskTile
+                delegate: RowLayout {
+                    id: slotWrap
                     required property int index
                     required property var model
 
-                    readonly property bool isLauncher: Boolean(taskTile.model.IsLauncher)
-                    readonly property bool isWindow: Boolean(taskTile.model.IsWindow)
-                    readonly property bool isStartup: Boolean(taskTile.model.IsStartup)
-                    readonly property bool isActive: Boolean(taskTile.model.IsActive)
-                    readonly property bool isAttention: Boolean(taskTile.model.IsDemandingAttention)
-                    readonly property bool isGroupParent: Boolean(taskTile.model.IsGroupParent)
-                    readonly property int childCount: Number(taskTile.model.ChildCount || 0)
+                    readonly property bool isLauncher: Boolean(slotWrap.model.IsLauncher)
+                    readonly property bool isWindow: Boolean(slotWrap.model.IsWindow)
+                    readonly property bool isStartup: Boolean(slotWrap.model.IsStartup)
+                    readonly property bool isActive: Boolean(slotWrap.model.IsActive)
+                    readonly property bool isAttention: Boolean(slotWrap.model.IsDemandingAttention)
+                    readonly property bool isGroupParent: Boolean(slotWrap.model.IsGroupParent)
+                    readonly property int childCount: Number(slotWrap.model.ChildCount || 0)
                     readonly property bool isRunning: isWindow || isStartup
-                    readonly property bool isPinned: isLauncher || Boolean(taskTile.model.HasLauncher)
-                    readonly property var launcherUrl: taskTile.model.LauncherUrlWithoutIcon
-                    readonly property string appName: String(taskTile.model.AppName || taskTile.model.display || "")
-                    readonly property string winTitle: String(taskTile.model.display || "")
-                    readonly property bool isDraggingThis: root.dragFromIndex === taskTile.index
+                    readonly property bool isPinned: isLauncher || Boolean(slotWrap.model.HasLauncher)
+                    readonly property bool showLeadingDivider: tasksModel.launcherCount > 0
+                        && tasksModel.count > 1
+                        && slotWrap.index > 0
+                        && !slotWrap.isPinned
+                        && root.isRowPinned(slotWrap.index - 1)
+                    readonly property var launcherUrl: slotWrap.model.LauncherUrlWithoutIcon
+                    readonly property string appName: String(slotWrap.model.AppName || slotWrap.model.display || "")
+                    readonly property string winTitle: String(slotWrap.model.display || "")
+                    readonly property bool isDraggingThis: root.dragFromIndex === slotWrap.index
 
-                    location: Plasmoid.location
-                    mainText: taskTile.appName
-                    subText: {
-                        if (taskTile.isLauncher) {
-                            return "Launch " + taskTile.appName;
-                        }
-                        if (taskTile.isGroupParent && taskTile.childCount > 1) {
-                            return taskTile.childCount + " open windows";
-                        }
-                        if (taskTile.winTitle && taskTile.winTitle !== taskTile.appName) {
-                            return taskTile.winTitle;
-                        }
-                        return "";
-                    }
-
-                    implicitWidth: 42
-                    implicitHeight: 44
+                    spacing: 8
                     Layout.alignment: Qt.AlignVCenter
-                    opacity: taskTile.isDraggingThis ? 0.55 : 1.0
 
-                    Behavior on opacity {
-                        NumberAnimation { duration: 100 }
+                    // Vertical divider between pinned apps and unpinned running apps
+                    Rectangle {
+                        visible: slotWrap.showLeadingDivider
+                        implicitWidth: 1
+                        implicitHeight: 26
+                        color: Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.16)
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.leftMargin: 2
+                        Layout.rightMargin: 2
+                        Layout.bottomMargin: 4
                     }
 
-                    // Subtle rounded focus/hover tile backdrop
-                    Rectangle {
-                        id: tileBg
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        y: 1
-                        width: 40
-                        height: 36
-                        radius: 10
-                        color: {
-                            if (taskTile.isActive) {
-                                return Qt.rgba(136 / 255, 192 / 255, 208 / 255, 0.14);
+                    PlasmaCore.ToolTipArea {
+                        id: taskTile
+                        location: Plasmoid.location
+                        mainText: slotWrap.appName
+                        subText: {
+                            if (slotWrap.isLauncher) {
+                                return "Launch " + slotWrap.appName;
                             }
-                            if (tileMouse.containsMouse) {
-                                return Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.09);
+                            if (slotWrap.isGroupParent && slotWrap.childCount > 1) {
+                                return slotWrap.childCount + " open windows";
                             }
-                            return "transparent";
-                        }
-                        border.width: taskTile.isActive ? 1 : 0
-                        border.color: Qt.rgba(136 / 255, 192 / 255, 208 / 255, 0.36)
-
-                        Behavior on color {
-                            ColorAnimation { duration: 120 }
+                            if (slotWrap.winTitle && slotWrap.winTitle !== slotWrap.appName) {
+                                return slotWrap.winTitle;
+                            }
+                            return "";
                         }
 
-                        Kirigami.Icon {
-                            id: appIcon
-                            anchors.centerIn: parent
-                            width: 30
-                            height: 30
-                            source: taskTile.model.decoration
-                            scale: tileMouse.pressed ? 0.92 : (tileMouse.containsMouse ? 1.06 : 1.0)
+                        implicitWidth: 38
+                        implicitHeight: 45
+                        Layout.alignment: Qt.AlignVCenter
+                        opacity: slotWrap.isDraggingThis ? 0.55 : 1.0
 
-                            Behavior on scale {
+                        Behavior on opacity {
+                            NumberAnimation { duration: 100 }
+                        }
+
+                        // Uniform dark Nordic squircle background card for every dock icon
+                        Rectangle {
+                            id: tileBg
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            y: 1
+                            width: 36
+                            height: 36
+                            radius: 10
+                            color: {
+                                if (slotWrap.isActive) {
+                                    return Qt.rgba(52 / 255, 68 / 255, 88 / 255, 0.72);
+                                }
+                                if (tileMouse.containsMouse) {
+                                    return Qt.rgba(54 / 255, 66 / 255, 84 / 255, 0.65);
+                                }
+                                return Qt.rgba(38 / 255, 47 / 255, 62 / 255, 0.52);
+                            }
+                            border.width: 1
+                            border.color: {
+                                if (slotWrap.isActive) {
+                                    return Qt.rgba(136 / 255, 192 / 255, 208 / 255, 0.52);
+                                }
+                                if (tileMouse.containsMouse) {
+                                    return Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.22);
+                                }
+                                return Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.11);
+                            }
+
+                            Behavior on color {
+                                ColorAnimation { duration: 120 }
+                            }
+                            Behavior on border.color {
+                                ColorAnimation { duration: 120 }
+                            }
+
+                            Kirigami.Icon {
+                                id: appIcon
+                                anchors.centerIn: parent
+                                width: 24
+                                height: 24
+                                source: slotWrap.model.decoration
+                                scale: tileMouse.pressed ? 0.92 : (tileMouse.containsMouse ? 1.08 : 1.0)
+
+                                Behavior on scale {
+                                    NumberAnimation {
+                                        duration: 120
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+                            }
+                        }
+
+                        // Compact animated pill indicator cleanly below the squircle card
+                        Rectangle {
+                            id: indicator
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 1
+                            height: 3
+                            radius: 1.5
+                            visible: slotWrap.isRunning
+                            width: {
+                                if (slotWrap.isActive) {
+                                    return 14;
+                                }
+                                if (slotWrap.isAttention) {
+                                    return 10;
+                                }
+                                return 4;
+                            }
+                            color: {
+                                if (slotWrap.isAttention) {
+                                    return "#ebcb8b";
+                                }
+                                if (slotWrap.isActive) {
+                                    return "#88c0d0";
+                                }
+                                return Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.62);
+                            }
+
+                            Behavior on width {
                                 NumberAnimation {
-                                    duration: 120
+                                    duration: 150
                                     easing.type: Easing.OutCubic
                                 }
                             }
-                        }
-                    }
-
-                    // Compact animated pill indicator lifted cleanly above the dock's bottom border
-                    Rectangle {
-                        id: indicator
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 2
-                        height: 3
-                        radius: 1.5
-                        visible: taskTile.isRunning
-                        width: {
-                            if (taskTile.isActive) {
-                                return 14;
-                            }
-                            if (taskTile.isAttention) {
-                                return 10;
-                            }
-                            return 4;
-                        }
-                        color: {
-                            if (taskTile.isAttention) {
-                                return "#ebcb8b";
-                            }
-                            if (taskTile.isActive) {
-                                return "#88c0d0";
-                            }
-                            return Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.62);
-                        }
-
-                        Behavior on width {
-                            NumberAnimation {
-                                duration: 150
-                                easing.type: Easing.OutCubic
-                            }
-                        }
-                        Behavior on color {
-                            ColorAnimation { duration: 120 }
-                        }
-                    }
-
-                    // Reorder drag + click + middle-click + right-click handler
-                    MouseArea {
-                        id: tileMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
-                        cursorShape: root.dragFromIndex >= 0 ? Qt.ClosedHandCursor : Qt.PointingHandCursor
-
-                        property real pressX: 0
-                        property bool dragged: false
-
-                        onPressed: function(mouse) {
-                            if (mouse.button === Qt.LeftButton) {
-                                pressX = mouse.x;
-                                dragged = false;
+                            Behavior on color {
+                                ColorAnimation { duration: 120 }
                             }
                         }
 
-                        onPositionChanged: function(mouse) {
-                            if (!(mouse.buttons & Qt.LeftButton)) {
-                                return;
-                            }
-                            if (!dragged && Math.abs(mouse.x - pressX) >= 8) {
-                                dragged = true;
-                                root.dragFromIndex = taskTile.index;
-                            }
-                            if (dragged && root.dragFromIndex >= 0) {
-                                const pt = mapToItem(iconsRow, mouse.x, iconsRow.height / 2);
-                                const slotWidth = 42 + iconsRow.spacing;
-                                const targetIdx = Math.max(
-                                    0,
-                                    Math.min(tasksModel.count - 1, Math.floor(pt.x / slotWidth))
-                                );
-                                if (targetIdx !== root.dragFromIndex) {
-                                    root.moveTask(root.dragFromIndex, targetIdx);
+                        MouseArea {
+                            id: tileMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
+                            cursorShape: root.dragFromIndex >= 0 ? Qt.ClosedHandCursor : Qt.PointingHandCursor
+
+                            property real pressX: 0
+                            property bool dragged: false
+
+                            onPressed: function(mouse) {
+                                if (mouse.button === Qt.LeftButton) {
+                                    pressX = mouse.x;
+                                    dragged = false;
                                 }
                             }
-                        }
 
-                        onReleased: function(mouse) {
-                            const wasDragged = dragged;
-                            dragged = false;
-                            root.dragFromIndex = -1;
-                            if (wasDragged) {
-                                return;
-                            }
-                            if (mouse.button === Qt.LeftButton) {
-                                root.activateItem(
-                                    taskTile.index,
-                                    taskTile.isLauncher,
-                                    taskTile.isActive,
-                                    taskTile.isGroupParent,
-                                    taskTile.childCount
-                                );
-                            } else if (mouse.button === Qt.MiddleButton) {
-                                tasksModel.requestNewInstance(tasksModel.makeModelIndex(taskTile.index));
-                            } else if (mouse.button === Qt.RightButton) {
-                                contextMenu.popup();
-                            }
-                        }
-
-                        onCanceled: {
-                            dragged = false;
-                            root.dragFromIndex = -1;
-                        }
-                    }
-
-                    PlasmaComponents.Menu {
-                        id: contextMenu
-
-                        PlasmaComponents.MenuItem {
-                            text: "New Window"
-                            icon.name: "window-new"
-                            onClicked: tasksModel.requestNewInstance(tasksModel.makeModelIndex(taskTile.index))
-                        }
-
-                        PlasmaComponents.MenuItem {
-                            text: taskTile.isPinned ? "Unpin from Dock" : "Pin to Dock"
-                            icon.name: taskTile.isPinned ? "window-unpin" : "window-pin"
-                            enabled: taskTile.launcherUrl !== undefined && String(taskTile.launcherUrl).length > 0
-                            onClicked: {
-                                if (taskTile.isPinned) {
-                                    tasksModel.requestRemoveLauncher(taskTile.launcherUrl);
-                                } else {
-                                    tasksModel.requestAddLauncher(taskTile.launcherUrl);
+                            onPositionChanged: function(mouse) {
+                                if (!(mouse.buttons & Qt.LeftButton)) {
+                                    return;
                                 }
-                                tasksModel.syncLaunchers();
-                            }
-                        }
-
-                        PlasmaComponents.MenuSeparator {
-                            visible: taskTile.isRunning
-                        }
-
-                        PlasmaComponents.MenuItem {
-                            visible: taskTile.isRunning
-                            text: taskTile.isGroupParent && taskTile.childCount > 1 ? "Close All Windows" : "Close"
-                            icon.name: "window-close"
-                            onClicked: {
-                                if (taskTile.isGroupParent && taskTile.childCount > 1) {
-                                    for (let c = taskTile.childCount - 1; c >= 0; --c) {
-                                        tasksModel.requestClose(tasksModel.makeModelIndex(taskTile.index, c));
+                                if (!dragged && Math.abs(mouse.x - pressX) >= 8) {
+                                    dragged = true;
+                                    root.dragFromIndex = slotWrap.index;
+                                }
+                                if (dragged && root.dragFromIndex >= 0) {
+                                    const pt = mapToItem(iconsRow, mouse.x, iconsRow.height / 2);
+                                    const slotWidth = 38 + iconsRow.spacing;
+                                    const targetIdx = Math.max(
+                                        0,
+                                        Math.min(tasksModel.count - 1, Math.floor(pt.x / slotWidth))
+                                    );
+                                    if (targetIdx !== root.dragFromIndex) {
+                                        root.moveTask(root.dragFromIndex, targetIdx);
                                     }
-                                } else {
-                                    tasksModel.requestClose(tasksModel.makeModelIndex(taskTile.index));
+                                }
+                            }
+
+                            onReleased: function(mouse) {
+                                const wasDragged = dragged;
+                                dragged = false;
+                                root.dragFromIndex = -1;
+                                if (wasDragged) {
+                                    return;
+                                }
+                                if (mouse.button === Qt.LeftButton) {
+                                    root.activateItem(
+                                        slotWrap.index,
+                                        slotWrap.isLauncher,
+                                        slotWrap.isActive,
+                                        slotWrap.isGroupParent,
+                                        slotWrap.childCount
+                                    );
+                                } else if (mouse.button === Qt.MiddleButton) {
+                                    tasksModel.requestNewInstance(tasksModel.makeModelIndex(slotWrap.index));
+                                } else if (mouse.button === Qt.RightButton) {
+                                    contextMenu.popup();
+                                }
+                            }
+
+                            onCanceled: {
+                                dragged = false;
+                                root.dragFromIndex = -1;
+                            }
+                        }
+
+                        PlasmaComponents.Menu {
+                            id: contextMenu
+
+                            PlasmaComponents.MenuItem {
+                                text: "New Window"
+                                icon.name: "window-new"
+                                onClicked: tasksModel.requestNewInstance(tasksModel.makeModelIndex(slotWrap.index))
+                            }
+
+                            PlasmaComponents.MenuItem {
+                                text: slotWrap.isPinned ? "Unpin from Dock" : "Pin to Dock"
+                                icon.name: slotWrap.isPinned ? "window-unpin" : "window-pin"
+                                enabled: slotWrap.launcherUrl !== undefined && String(slotWrap.launcherUrl).length > 0
+                                onClicked: {
+                                    if (slotWrap.isPinned) {
+                                        tasksModel.requestRemoveLauncher(slotWrap.launcherUrl);
+                                    } else {
+                                        tasksModel.requestAddLauncher(slotWrap.launcherUrl);
+                                    }
+                                    tasksModel.syncLaunchers();
+                                }
+                            }
+
+                            PlasmaComponents.MenuSeparator {
+                                visible: slotWrap.isRunning
+                            }
+
+                            PlasmaComponents.MenuItem {
+                                visible: slotWrap.isRunning
+                                text: slotWrap.isGroupParent && slotWrap.childCount > 1 ? "Close All Windows" : "Close"
+                                icon.name: "window-close"
+                                onClicked: {
+                                    if (slotWrap.isGroupParent && slotWrap.childCount > 1) {
+                                        for (let c = slotWrap.childCount - 1; c >= 0; --c) {
+                                            tasksModel.requestClose(tasksModel.makeModelIndex(slotWrap.index, c));
+                                        }
+                                    } else {
+                                        tasksModel.requestClose(tasksModel.makeModelIndex(slotWrap.index));
+                                    }
                                 }
                             }
                         }
