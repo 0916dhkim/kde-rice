@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
@@ -75,6 +75,7 @@ test("Global Theme (look-and-feel) and Wallpaper KPackages are valid", () => {
   const defaults = readFileSync(join(lnfDir, "contents/defaults"), "utf8");
   assert.match(defaults, /widgetStyle=Breeze/);
   assert.match(defaults, /ColorScheme=NordicMinimal/);
+  assert.match(defaults, /Theme=nordic-icons/);
   assert.match(defaults, /name=nordic-glass/);
   assert.match(defaults, /Image=NordicMist/);
   assert.match(defaults, /library=org\.kde\.breeze/);
@@ -322,6 +323,37 @@ test("KWin 6 nordic-notitlebar script and /etc/xdg/kwinrc rounded-corner default
   assert.match(kwinrc, /^Size=12$/m);
   assert.match(kwinrc, /^OutlineColor=136,192,208$/m);
   assert.match(kwinrc, /^UseNativeDecorationShadows=false$/m);
+});
+
+test("nordic-icons overlay theme has valid index.theme, SVGs, and zero broken symlinks", () => {
+  const iconRoot = join(ROOT, "icons/nordic-icons");
+  const idx = readFileSync(join(iconRoot, "index.theme"), "utf8");
+  assert.match(idx, /^Name=Nordic Icons$/m);
+  assert.match(idx, /^Inherits=breeze-dark$/m);
+  assert.match(idx, /^FollowsColorScheme=true$/m);
+
+  let files = 0;
+  let links = 0;
+  function walk(dir) {
+    for (const entry of readdirSync(dir)) {
+      const full = join(dir, entry);
+      const lst = lstatSync(full);
+      if (lst.isSymbolicLink()) {
+        assert.ok(existsSync(full), `broken symlink: ${full}`);
+        assert.ok(statSync(full).isFile(), `symlink target not file: ${full}`);
+        links += 1;
+      } else if (lst.isDirectory()) {
+        walk(full);
+      } else if (entry.endsWith(".svg")) {
+        const text = readFileSync(full, "utf8");
+        assert.match(text, /ColorScheme-Text/, `missing KDE ColorScheme-Text class in ${full}`);
+        files += 1;
+      }
+    }
+  }
+  walk(iconRoot);
+  assert.ok(files >= 30, `expected >= 30 canonical SVGs, got ${files}`);
+  assert.ok(links >= 100, `expected >= 100 alias symlinks, got ${links}`);
 });
 
 test("PKGBUILD and .SRCINFO are valid and consistent", () => {

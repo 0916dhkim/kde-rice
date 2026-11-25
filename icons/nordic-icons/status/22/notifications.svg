@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">
+  <defs>
+    <style id="current-color-scheme" type="text/css">
+      .ColorScheme-Text { color: #d8dee9; }
+      .ColorScheme-Highlight { color: #88c0d0; }
+      .ColorScheme-PositiveText { color: #a3be8c; }
+      .ColorScheme-NegativeText { color: #bf616a; }
+    </style>
+  </defs>
+  <g class="ColorScheme-Text" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16.2 14.8H5.8c1-1.1 1.5-2.4 1.5-4.4a3.7 3.7 0 1 1 7.4 0c0 2 .5 3.3 1.5 4.4z" fill="currentColor" fill-opacity="0.16"/>
+    <path d="M9.4 17.5a1.8 1.8 0 0 0 3.2 0"/>
+  </g>
+</svg>

@@ -5,7 +5,7 @@ widgetStyle=Breeze
 ColorScheme=NordicMinimal
 
 [kdeglobals][Icons]
-Theme=breeze-dark
+Theme=nordic-icons
 
 [plasmarc][Theme]
 name=nordic-glass

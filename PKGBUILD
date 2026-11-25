@@ -47,12 +47,16 @@ package() {
     install -d "$pkgdir/usr/share/wallpapers"
     cp -r wallpapers/NordicMist "$pkgdir/usr/share/wallpapers/"
 
+    # Nordic Icons overlay theme (inherits breeze-dark)
+    install -d "$pkgdir/usr/share/icons"
+    cp -a icons/nordic-icons "$pkgdir/usr/share/icons/"
+
     # KWin 6 borderless windows script + system-wide XDG kwinrc defaults (rounded corners + outlines + shadows)
     install -d "$pkgdir/usr/share/kwin/scripts"
     cp -r kwin/scripts/nordic-notitlebar "$pkgdir/usr/share/kwin/scripts/"
     install -Dm644 kwin/kwinrc "$pkgdir/etc/xdg/kwinrc"
 
-    # Normalize permissions cleanly for system installation
+    # Normalize permissions cleanly for system installation (preserve symlinks)
     find "$pkgdir/usr/share" -type d -exec chmod 755 {} +
-    find "$pkgdir/usr/share" -type f -exec chmod 644 {} +
+    find "$pkgdir/usr/share" -type f ! -type l -exec chmod 644 {} +
 }
