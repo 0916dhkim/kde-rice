@@ -280,14 +280,24 @@ test("Global Theme desktop-layout.js builds top floating bar + bottom autohide f
   assert.ok(Array.isArray(res2.created[1]._widgets[0]._cfg["General:launchers"]));
 });
 
-test("Klassy Nordic Minimal preset is valid", () => {
-  const preset = readFileSync(join(ROOT, "klassy/Nordic_Minimal.klpw"), "utf8");
-  assert.match(preset, /^\[Klassy Window Decoration Preset File\]/m);
-  assert.match(preset, /^\[Windeco Preset Nordic Minimal\]/m);
-  assert.match(preset, /^WindowCornerRadius=10$/m);
-  assert.match(preset, /^WindowOutlineStyleActive=WindowOutlineAccentColor$/m);
-  assert.match(preset, /^WindowOutlineThickness=1$/m);
-  assert.match(preset, /^KwinButtonsOnRight=IAX$/m);
+test("Klassy system-wide XDG klassyrc defaults are valid", () => {
+  const rc = readFileSync(join(ROOT, "klassy/klassyrc"), "utf8");
+  for (const group of [
+    "[Windeco]",
+    "[ButtonSizing]",
+    "[ButtonColors]",
+    "[ButtonBehaviour]",
+    "[TitleBarSpacing]",
+    "[TitleBarOpacity]",
+    "[WindowOutlineStyle]",
+    "[ShadowStyle]",
+  ]) {
+    assert.ok(rc.includes(group), `klassy/klassyrc missing ${group}`);
+  }
+  assert.match(rc, /^WindowCornerRadius=10$/m);
+  assert.match(rc, /^WindowOutlineStyleActive=WindowOutlineAccentColor$/m);
+  assert.match(rc, /^WindowOutlineThickness=1$/m);
+  assert.match(rc, /^BlurTransparentTitleBars=true$/m);
 });
 
 test("PKGBUILD and .SRCINFO are valid and consistent", () => {

@@ -46,9 +46,9 @@ package() {
     install -d "$pkgdir/usr/share/wallpapers"
     cp -r wallpapers/NordicMist "$pkgdir/usr/share/wallpapers/"
 
-    # Klassy Nordic Minimal window decoration preset
-    install -Dm644 klassy/Nordic_Minimal.klpw \
-        "$pkgdir/usr/share/kde-rice/Nordic_Minimal.klpw"
+    # System-wide Klassy defaults via XDG KConfig cascading (overridable in ~/.config/klassy/klassyrc)
+    install -Dm644 klassy/klassyrc \
+        "$pkgdir/etc/xdg/klassy/klassyrc"
 
     # Normalize permissions cleanly for system installation
     find "$pkgdir/usr/share" -type d -exec chmod 755 {} +
