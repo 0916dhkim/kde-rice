@@ -47,6 +47,7 @@ test("all 4 Plasma 6 plasmoids have valid metadata.json and QML entrypoint", () 
     const qml = readFileSync(qmlPath, "utf8");
     assert.match(qml, /\bPlasmoidItem\s*\{/, `${id}: uses Plasma 6 PlasmoidItem root`);
     assert.doesNotMatch(qml, /import\s+org\.kde\.plasma\.core\s+\d/, `${id}: unversioned Qt6 imports`);
+    assert.doesNotMatch(qml, /font\.pixelSize\s*:\s*\d+\.\d+/, `${id}: font.pixelSize must be integer`);
   }
 });
 

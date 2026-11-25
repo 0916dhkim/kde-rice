@@ -111,7 +111,7 @@ PlasmoidItem {
                 id: appLabel
                 text: root.activeAppName
                 color: "#eceff4"
-                font.pixelSize: 12.5
+                font.pixelSize: 13
                 font.weight: Font.Medium
                 elide: Text.ElideRight
                 Layout.alignment: Qt.AlignVCenter

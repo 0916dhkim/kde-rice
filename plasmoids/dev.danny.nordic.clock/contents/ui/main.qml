@@ -62,7 +62,7 @@ PlasmoidItem {
                 anchors.centerIn: parent
                 text: Qt.formatDate(root.now, "ddd MMM d") + "  " + Qt.formatTime(root.now, "HH:mm")
                 color: "#eceff4"
-                font.pixelSize: 12.5
+                font.pixelSize: 13
                 font.weight: Font.DemiBold
                 font.letterSpacing: 0.2
             }
@@ -106,7 +106,7 @@ PlasmoidItem {
                 }
                 QQC2.ToolButton {
                     text: "Today"
-                    font.pixelSize: 11.5
+                    font.pixelSize: 12
                     onClicked: {
                         root.shownYear = root.now.getFullYear();
                         root.shownMonth = root.now.getMonth();

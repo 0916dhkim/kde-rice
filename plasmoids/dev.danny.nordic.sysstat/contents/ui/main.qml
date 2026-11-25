@@ -43,6 +43,7 @@ PlasmoidItem {
 
             Kirigami.Icon {
                 source: "cpu-symbolic"
+                isMask: true
                 implicitWidth: 14
                 implicitHeight: 14
                 color: root.cpuPct >= 80 ? "#ebcb8b" : Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.78)
