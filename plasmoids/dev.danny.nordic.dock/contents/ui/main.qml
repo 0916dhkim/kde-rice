@@ -23,8 +23,10 @@ PlasmoidItem {
     readonly property int dividerHeight: 26
 
     property int dragFromIndex: -1
+    property int pressedIndex: -1
     property bool syncingLaunchers: false
     property int dividerBeforeIndex: -1
+    property int menuRow: -1
 
     TaskManager.TasksModel {
         id: tasksModel
@@ -36,18 +38,17 @@ PlasmoidItem {
         filterByScreen: false
         filterByActivity: true
         filterHidden: true
-        // qmllint disable missing-property
-        launcherList: Plasmoid.configuration.launchers
 
         onLauncherListChanged: {
             if (!root.syncingLaunchers) {
                 root.syncingLaunchers = true;
+                // qmllint disable missing-property
                 Plasmoid.configuration.launchers = launcherList;
+                // qmllint enable missing-property
                 root.syncingLaunchers = false;
             }
             root.refreshDivider();
         }
-        // qmllint enable missing-property
 
         onCountChanged: root.refreshDivider()
         onDataChanged: root.refreshDivider()
@@ -57,14 +58,32 @@ PlasmoidItem {
         onModelReset: root.refreshDivider()
     }
 
+    Connections {
+        target: Plasmoid.configuration
+        function onValueChanged(key: string, value: var): void {
+            if (key === "launchers" && !root.syncingLaunchers) {
+                root.syncingLaunchers = true;
+                tasksModel.launcherList = value;
+                root.syncingLaunchers = false;
+                root.refreshDivider();
+            }
+        }
+    }
+
+    function isRowPinned(row: int): bool {
+        if (row < 0 || row >= tasksModel.count) {
+            return false;
+        }
+        const idx = tasksModel.makeModelIndex(row);
+        return Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.IsLauncher))
+            || Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.HasLauncher));
+    }
+
     function refreshDivider(): void {
         const total = tasksModel.count;
         let seenPinned = false;
         for (let i = 0; i < total; ++i) {
-            const idx = tasksModel.makeModelIndex(i);
-            const pinned = Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.IsLauncher))
-                || Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.HasLauncher));
-            if (pinned) {
+            if (isRowPinned(i)) {
                 seenPinned = true;
             } else if (seenPinned) {
                 dividerBeforeIndex = i;
@@ -74,14 +93,18 @@ PlasmoidItem {
         dividerBeforeIndex = -1;
     }
 
-    Component.onCompleted: Qt.callLater(root.refreshDivider)
-
-    function activateItem(row: int, isLauncher: bool, isActive: bool, isGroupParent: bool, childCount: int): void {
+    function activateRow(row: int): void {
+        if (row < 0 || row >= tasksModel.count) {
+            return;
+        }
         const idx = tasksModel.makeModelIndex(row);
+        const isLauncher = Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.IsLauncher));
         if (isLauncher) {
             tasksModel.requestActivate(idx);
             return;
         }
+        const isGroupParent = Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.IsGroupParent));
+        const childCount = Number(tasksModel.data(idx, TaskManager.AbstractTasksModel.ChildCount) || 0);
         if (isGroupParent && childCount > 1) {
             let activeChild = -1;
             for (let c = 0; c < childCount; ++c) {
@@ -95,6 +118,7 @@ PlasmoidItem {
             tasksModel.requestActivate(tasksModel.makeModelIndex(row, nextChild));
             return;
         }
+        const isActive = Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.IsActive));
         if (isActive) {
             tasksModel.requestToggleMinimized(idx);
         } else {
@@ -102,7 +126,7 @@ PlasmoidItem {
         }
     }
 
-    function moveTask(fromRow: int, toRow: int): void {
+    function moveTaskStep(fromRow: int, toRow: int): void {
         if (fromRow < 0 || toRow < 0 || fromRow === toRow) {
             return;
         }
@@ -110,7 +134,6 @@ PlasmoidItem {
             return;
         }
         if (tasksModel.move(fromRow, toRow)) {
-            tasksModel.syncLaunchers();
             root.dragFromIndex = toRow;
         }
     }
@@ -128,14 +151,44 @@ PlasmoidItem {
         tasksModel.syncLaunchers();
     }
 
+    Component.onCompleted: {
+        root.syncingLaunchers = true;
+        // qmllint disable missing-property
+        tasksModel.launcherList = Plasmoid.configuration.launchers;
+        // qmllint enable missing-property
+        root.syncingLaunchers = false;
+        Qt.callLater(root.refreshDivider);
+    }
+
     fullRepresentation: Item {
         id: dockRoot
-        // Zero redundant horizontal padding — panel SVG + containment provide clean ~10px outer margins
         implicitWidth: Math.max(root.squircleSize, iconsRow.implicitWidth)
         implicitHeight: root.innerHeight
         Layout.minimumWidth: implicitWidth
         Layout.preferredWidth: implicitWidth
         Layout.fillHeight: true
+
+        function rowAtX(xPos: real): int {
+            const total = taskRepeater.count;
+            if (total <= 0) {
+                return -1;
+            }
+            for (let i = 0; i < total; ++i) {
+                const item = taskRepeater.itemAt(i);
+                if (!item) {
+                    continue;
+                }
+                const left = item.x - 4;
+                const right = item.x + item.width + 4;
+                if (xPos >= left && xPos <= right) {
+                    return i;
+                }
+            }
+            if (xPos < 0) {
+                return 0;
+            }
+            return total - 1;
+        }
 
         DropArea {
             id: externalDrop
@@ -164,6 +217,89 @@ PlasmoidItem {
             visible: externalDrop.containsDrag
         }
 
+        // Single stable MouseArea outside Repeater so dragging across multiple slots never cancels or shifts coordinates
+        MouseArea {
+            id: dockMouse
+            anchors.fill: iconsRow
+            z: -1
+            hoverEnabled: false
+            acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
+            cursorShape: root.dragFromIndex >= 0 ? Qt.ClosedHandCursor : Qt.PointingHandCursor
+
+            property real pressX: 0
+            property bool dragged: false
+            property bool movedAny: false
+
+            onPressed: function(mouse) {
+                const idx = dockRoot.rowAtX(mouse.x);
+                root.pressedIndex = idx;
+                pressX = mouse.x;
+                dragged = false;
+                movedAny = false;
+            }
+
+            onPositionChanged: function(mouse) {
+                if (!(mouse.buttons & Qt.LeftButton) || root.pressedIndex < 0) {
+                    return;
+                }
+                if (!dragged && Math.abs(mouse.x - pressX) >= 8) {
+                    dragged = true;
+                    root.dragFromIndex = root.pressedIndex;
+                }
+                if (dragged && root.dragFromIndex >= 0) {
+                    const targetIdx = dockRoot.rowAtX(mouse.x);
+                    if (targetIdx >= 0 && targetIdx !== root.dragFromIndex) {
+                        // Keep pinned drags inside pinned section and unpinned drags inside unpinned section
+                        if (root.isRowPinned(root.dragFromIndex) === root.isRowPinned(targetIdx)) {
+                            root.moveTaskStep(root.dragFromIndex, targetIdx);
+                            movedAny = true;
+                        }
+                    }
+                }
+            }
+
+            onReleased: function(mouse) {
+                const wasDragged = dragged;
+                const didMove = movedAny;
+                const clickedRow = root.pressedIndex;
+
+                dragged = false;
+                movedAny = false;
+                root.dragFromIndex = -1;
+                root.pressedIndex = -1;
+
+                if (wasDragged) {
+                    if (didMove) {
+                        tasksModel.syncLaunchers();
+                        root.refreshDivider();
+                    }
+                    return;
+                }
+                if (clickedRow < 0 || clickedRow >= tasksModel.count) {
+                    return;
+                }
+                if (mouse.button === Qt.LeftButton) {
+                    root.activateRow(clickedRow);
+                } else if (mouse.button === Qt.MiddleButton) {
+                    tasksModel.requestNewInstance(tasksModel.makeModelIndex(clickedRow));
+                } else if (mouse.button === Qt.RightButton) {
+                    root.menuRow = clickedRow;
+                    contextMenu.popup();
+                }
+            }
+
+            onCanceled: {
+                if (movedAny) {
+                    tasksModel.syncLaunchers();
+                    root.refreshDivider();
+                }
+                dragged = false;
+                movedAny = false;
+                root.dragFromIndex = -1;
+                root.pressedIndex = -1;
+            }
+        }
+
         RowLayout {
             id: iconsRow
             anchors.centerIn: parent
@@ -186,12 +322,11 @@ PlasmoidItem {
                     readonly property bool isGroupParent: Boolean(slotWrap.model.IsGroupParent)
                     readonly property int childCount: Number(slotWrap.model.ChildCount || 0)
                     readonly property bool isRunning: isWindow || isStartup
-                    readonly property bool isPinned: isLauncher || Boolean(slotWrap.model.HasLauncher)
                     readonly property bool showLeadingDivider: slotWrap.index === root.dividerBeforeIndex
-                    readonly property var launcherUrl: slotWrap.model.LauncherUrlWithoutIcon
                     readonly property string appName: String(slotWrap.model.AppName || slotWrap.model.display || "")
                     readonly property string winTitle: String(slotWrap.model.display || "")
                     readonly property bool isDraggingThis: root.dragFromIndex === slotWrap.index
+                    readonly property bool isPressedThis: root.pressedIndex === slotWrap.index && root.dragFromIndex < 0
 
                     spacing: 8
                     Layout.alignment: Qt.AlignVCenter
@@ -238,7 +373,6 @@ PlasmoidItem {
                             NumberAnimation { duration: 100 }
                         }
 
-                        // Uniform 36x36 dark Nordic squircle background card
                         Rectangle {
                             id: tileBg
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -250,7 +384,7 @@ PlasmoidItem {
                                 if (slotWrap.isActive) {
                                     return Qt.rgba(52 / 255, 68 / 255, 88 / 255, 0.74);
                                 }
-                                if (tileMouse.containsMouse) {
+                                if (taskTile.containsMouse) {
                                     return Qt.rgba(54 / 255, 66 / 255, 84 / 255, 0.65);
                                 }
                                 return Qt.rgba(38 / 255, 47 / 255, 62 / 255, 0.54);
@@ -260,7 +394,7 @@ PlasmoidItem {
                                 if (slotWrap.isActive) {
                                     return Qt.rgba(136 / 255, 192 / 255, 208 / 255, 0.54);
                                 }
-                                if (tileMouse.containsMouse) {
+                                if (taskTile.containsMouse) {
                                     return Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.22);
                                 }
                                 return Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.11);
@@ -279,7 +413,7 @@ PlasmoidItem {
                                 width: 24
                                 height: 24
                                 source: slotWrap.model.decoration
-                                scale: tileMouse.pressed ? 0.92 : (tileMouse.containsMouse ? 1.08 : 1.0)
+                                scale: slotWrap.isPressedThis ? 0.92 : (taskTile.containsMouse ? 1.08 : 1.0)
 
                                 Behavior on scale {
                                     NumberAnimation {
@@ -290,7 +424,6 @@ PlasmoidItem {
                             }
                         }
 
-                        // Compact animated pill indicator (4px gap below squircle, 6px total above dock edge)
                         Rectangle {
                             id: indicator
                             anchors.horizontalCenter: parent.horizontalCenter
@@ -327,115 +460,79 @@ PlasmoidItem {
                                 ColorAnimation { duration: 120 }
                             }
                         }
+                    }
+                }
+            }
+        }
 
-                        MouseArea {
-                            id: tileMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
-                            cursorShape: root.dragFromIndex >= 0 ? Qt.ClosedHandCursor : Qt.PointingHandCursor
+        // Single shared context menu for right-click on any dock slot
+        PlasmaComponents.Menu {
+            id: contextMenu
 
-                            property real pressX: 0
-                            property bool dragged: false
+            readonly property bool validRow: root.menuRow >= 0 && root.menuRow < tasksModel.count
+            readonly property var rowIdx: validRow ? tasksModel.makeModelIndex(root.menuRow) : null
+            readonly property bool rowPinned: validRow ? root.isRowPinned(root.menuRow) : false
+            readonly property bool rowRunning: validRow
+                ? (Boolean(tasksModel.data(rowIdx, TaskManager.AbstractTasksModel.IsWindow))
+                   || Boolean(tasksModel.data(rowIdx, TaskManager.AbstractTasksModel.IsStartup)))
+                : false
+            readonly property bool rowGroup: validRow
+                ? Boolean(tasksModel.data(rowIdx, TaskManager.AbstractTasksModel.IsGroupParent))
+                : false
+            readonly property int rowChildren: validRow
+                ? Number(tasksModel.data(rowIdx, TaskManager.AbstractTasksModel.ChildCount) || 0)
+                : 0
+            readonly property var rowLauncherUrl: validRow
+                ? tasksModel.data(rowIdx, TaskManager.AbstractTasksModel.LauncherUrlWithoutIcon)
+                : ""
 
-                            onPressed: function(mouse) {
-                                if (mouse.button === Qt.LeftButton) {
-                                    pressX = mouse.x;
-                                    dragged = false;
-                                }
-                            }
+            PlasmaComponents.MenuItem {
+                text: "New Window"
+                icon.name: "window-new"
+                enabled: contextMenu.validRow
+                onClicked: {
+                    if (contextMenu.validRow) {
+                        tasksModel.requestNewInstance(tasksModel.makeModelIndex(root.menuRow));
+                    }
+                }
+            }
 
-                            onPositionChanged: function(mouse) {
-                                if (!(mouse.buttons & Qt.LeftButton)) {
-                                    return;
-                                }
-                                if (!dragged && Math.abs(mouse.x - pressX) >= 8) {
-                                    dragged = true;
-                                    root.dragFromIndex = slotWrap.index;
-                                }
-                                if (dragged && root.dragFromIndex >= 0) {
-                                    const pt = mapToItem(iconsRow, mouse.x, iconsRow.height / 2);
-                                    const slotWidth = root.squircleSize + iconsRow.spacing;
-                                    const targetIdx = Math.max(
-                                        0,
-                                        Math.min(tasksModel.count - 1, Math.floor(pt.x / slotWidth))
-                                    );
-                                    if (targetIdx !== root.dragFromIndex) {
-                                        root.moveTask(root.dragFromIndex, targetIdx);
-                                    }
-                                }
-                            }
+            PlasmaComponents.MenuItem {
+                text: contextMenu.rowPinned ? "Unpin from Dock" : "Pin to Dock"
+                icon.name: contextMenu.rowPinned ? "window-unpin" : "window-pin"
+                enabled: contextMenu.validRow && contextMenu.rowLauncherUrl !== undefined && String(contextMenu.rowLauncherUrl).length > 0
+                onClicked: {
+                    if (!contextMenu.validRow) {
+                        return;
+                    }
+                    if (contextMenu.rowPinned) {
+                        tasksModel.requestRemoveLauncher(contextMenu.rowLauncherUrl);
+                    } else {
+                        tasksModel.requestAddLauncher(contextMenu.rowLauncherUrl);
+                    }
+                    tasksModel.syncLaunchers();
+                    root.refreshDivider();
+                }
+            }
 
-                            onReleased: function(mouse) {
-                                const wasDragged = dragged;
-                                dragged = false;
-                                root.dragFromIndex = -1;
-                                if (wasDragged) {
-                                    return;
-                                }
-                                if (mouse.button === Qt.LeftButton) {
-                                    root.activateItem(
-                                        slotWrap.index,
-                                        slotWrap.isLauncher,
-                                        slotWrap.isActive,
-                                        slotWrap.isGroupParent,
-                                        slotWrap.childCount
-                                    );
-                                } else if (mouse.button === Qt.MiddleButton) {
-                                    tasksModel.requestNewInstance(tasksModel.makeModelIndex(slotWrap.index));
-                                } else if (mouse.button === Qt.RightButton) {
-                                    contextMenu.popup();
-                                }
-                            }
+            PlasmaComponents.MenuSeparator {
+                visible: contextMenu.rowRunning
+            }
 
-                            onCanceled: {
-                                dragged = false;
-                                root.dragFromIndex = -1;
-                            }
+            PlasmaComponents.MenuItem {
+                visible: contextMenu.rowRunning
+                text: contextMenu.rowGroup && contextMenu.rowChildren > 1 ? "Close All Windows" : "Close"
+                icon.name: "window-close"
+                onClicked: {
+                    if (!contextMenu.validRow) {
+                        return;
+                    }
+                    if (contextMenu.rowGroup && contextMenu.rowChildren > 1) {
+                        for (let c = contextMenu.rowChildren - 1; c >= 0; --c) {
+                            tasksModel.requestClose(tasksModel.makeModelIndex(root.menuRow, c));
                         }
-
-                        PlasmaComponents.Menu {
-                            id: contextMenu
-
-                            PlasmaComponents.MenuItem {
-                                text: "New Window"
-                                icon.name: "window-new"
-                                onClicked: tasksModel.requestNewInstance(tasksModel.makeModelIndex(slotWrap.index))
-                            }
-
-                            PlasmaComponents.MenuItem {
-                                text: slotWrap.isPinned ? "Unpin from Dock" : "Pin to Dock"
-                                icon.name: slotWrap.isPinned ? "window-unpin" : "window-pin"
-                                enabled: slotWrap.launcherUrl !== undefined && String(slotWrap.launcherUrl).length > 0
-                                onClicked: {
-                                    if (slotWrap.isPinned) {
-                                        tasksModel.requestRemoveLauncher(slotWrap.launcherUrl);
-                                    } else {
-                                        tasksModel.requestAddLauncher(slotWrap.launcherUrl);
-                                    }
-                                    tasksModel.syncLaunchers();
-                                }
-                            }
-
-                            PlasmaComponents.MenuSeparator {
-                                visible: slotWrap.isRunning
-                            }
-
-                            PlasmaComponents.MenuItem {
-                                visible: slotWrap.isRunning
-                                text: slotWrap.isGroupParent && slotWrap.childCount > 1 ? "Close All Windows" : "Close"
-                                icon.name: "window-close"
-                                onClicked: {
-                                    if (slotWrap.isGroupParent && slotWrap.childCount > 1) {
-                                        for (let c = slotWrap.childCount - 1; c >= 0; --c) {
-                                            tasksModel.requestClose(tasksModel.makeModelIndex(slotWrap.index, c));
-                                        }
-                                    } else {
-                                        tasksModel.requestClose(tasksModel.makeModelIndex(slotWrap.index));
-                                    }
-                                }
-                            }
-                        }
+                    } else {
+                        tasksModel.requestClose(tasksModel.makeModelIndex(root.menuRow));
                     }
                 }
             }
