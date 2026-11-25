@@ -10,7 +10,7 @@ depends=(
     'plasma-workspace'
     'plasma-desktop'
     'libksysguard'
-    'klassy'
+    'kwin-effect-rounded-corners-git'
 )
 makedepends=('git')
 provides=('kde-rice')
@@ -46,9 +46,10 @@ package() {
     install -d "$pkgdir/usr/share/wallpapers"
     cp -r wallpapers/NordicMist "$pkgdir/usr/share/wallpapers/"
 
-    # System-wide Klassy defaults via XDG KConfig cascading (overridable in ~/.config/klassy/klassyrc)
-    install -Dm644 klassy/klassyrc \
-        "$pkgdir/etc/xdg/klassy/klassyrc"
+    # KWin 6 borderless windows script + system-wide XDG kwinrc defaults (rounded corners + outlines + shadows)
+    install -d "$pkgdir/usr/share/kwin/scripts"
+    cp -r kwin/scripts/nordic-notitlebar "$pkgdir/usr/share/kwin/scripts/"
+    install -Dm644 kwin/kwinrc "$pkgdir/etc/xdg/kwinrc"
 
     # Normalize permissions cleanly for system installation
     find "$pkgdir/usr/share" -type d -exec chmod 755 {} +

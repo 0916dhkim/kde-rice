@@ -72,19 +72,18 @@ test("Global Theme (look-and-feel) and Wallpaper KPackages are valid", () => {
   assert.equal(lnfMeta.KPlugin?.Id, "dev.danny.nordic");
 
   const defaults = readFileSync(join(lnfDir, "contents/defaults"), "utf8");
-  assert.match(defaults, /widgetStyle=Klassy/);
+  assert.match(defaults, /widgetStyle=Breeze/);
   assert.match(defaults, /ColorScheme=NordicMinimal/);
   assert.match(defaults, /name=nordic-glass/);
   assert.match(defaults, /Image=NordicMist/);
-  assert.match(defaults, /library=org\.kde\.klassy/);
-  assert.match(defaults, /theme=Klassy/);
+  assert.match(defaults, /library=org\.kde\.breeze/);
+  assert.match(defaults, /theme=Breeze/);
 
   assert.ok(existsSync(join(lnfDir, "contents/previews/preview.png")));
   assert.ok(existsSync(join(lnfDir, "contents/previews/fullscreenpreview.jpg")));
 
   const layoutDefaults = readFileSync(join(lnfDir, "contents/layouts/defaults"), "utf8");
-  assert.match(layoutDefaults, /ButtonsOnRight=IAX/);
-  assert.match(layoutDefaults, /BorderlessMaximizedWindows=false/);
+  assert.match(layoutDefaults, /BorderlessMaximizedWindows=true/);
 
   const wallMeta = JSON.parse(readFileSync(join(ROOT, "wallpapers/NordicMist/metadata.json"), "utf8"));
   assert.equal(wallMeta.KPlugin?.Id, "NordicMist");
@@ -280,24 +279,47 @@ test("Global Theme desktop-layout.js builds top floating bar + bottom autohide f
   assert.ok(Array.isArray(res2.created[1]._widgets[0]._cfg["General:launchers"]));
 });
 
-test("Klassy system-wide XDG klassyrc defaults are valid", () => {
-  const rc = readFileSync(join(ROOT, "klassy/klassyrc"), "utf8");
-  for (const group of [
-    "[Windeco]",
-    "[ButtonSizing]",
-    "[ButtonColors]",
-    "[ButtonBehaviour]",
-    "[TitleBarSpacing]",
-    "[TitleBarOpacity]",
-    "[WindowOutlineStyle]",
-    "[ShadowStyle]",
-  ]) {
-    assert.ok(rc.includes(group), `klassy/klassyrc missing ${group}`);
-  }
-  assert.match(rc, /^WindowCornerRadius=10$/m);
-  assert.match(rc, /^WindowOutlineStyleActive=WindowOutlineAccentColor$/m);
-  assert.match(rc, /^WindowOutlineThickness=1$/m);
-  assert.match(rc, /^BlurTransparentTitleBars=true$/m);
+test("KWin 6 nordic-notitlebar script and /etc/xdg/kwinrc rounded-corner defaults are valid", () => {
+  const kwinDir = join(ROOT, "kwin/scripts/nordic-notitlebar");
+  const meta = JSON.parse(readFileSync(join(kwinDir, "metadata.json"), "utf8"));
+  assert.equal(meta.KPackageStructure, "KWin/Script");
+  assert.equal(meta.KPlugin?.Id, "nordic-notitlebar");
+  assert.equal(meta.KPlugin?.EnabledByDefault, true);
+  assert.equal(meta["X-Plasma-API"], "javascript");
+
+  const src = readFileSync(join(kwinDir, "contents/code/main.js"), "utf8");
+  let addedHandler = null;
+  const makeWin = (props) => ({
+    noBorder: false,
+    fullScreen: false,
+    fullScreenChanged: { connect: () => {} },
+    ...props,
+  });
+  const normal = makeWin({ normalWindow: true });
+  const dialog = makeWin({ dialog: true });
+  const dock = makeWin({ dock: true, normalWindow: false });
+  const addedNormal = makeWin({ normalWindow: true });
+
+  vm.runInNewContext(src, {
+    workspace: {
+      windowAdded: { connect: (fn) => { addedHandler = fn; } },
+      windowList: () => [normal, dialog, dock],
+    },
+  });
+  assert.equal(normal.noBorder, true);
+  assert.equal(dialog.noBorder, true);
+  assert.equal(dock.noBorder, false);
+  addedHandler(addedNormal);
+  assert.equal(addedNormal.noBorder, true);
+
+  const kwinrc = readFileSync(join(ROOT, "kwin/kwinrc"), "utf8");
+  assert.match(kwinrc, /^\[Plugins\]/m);
+  assert.match(kwinrc, /^kwin4_effect_shapecornersEnabled=true$/m);
+  assert.match(kwinrc, /^nordic-notitlebarEnabled=true$/m);
+  assert.match(kwinrc, /^\[Round-Corners\]/m);
+  assert.match(kwinrc, /^Size=12$/m);
+  assert.match(kwinrc, /^OutlineColor=136,192,208$/m);
+  assert.match(kwinrc, /^UseNativeDecorationShadows=false$/m);
 });
 
 test("PKGBUILD and .SRCINFO are valid and consistent", () => {
@@ -306,11 +328,11 @@ test("PKGBUILD and .SRCINFO are valid and consistent", () => {
   execFileSync("bash", ["-n", join(ROOT, "PKGBUILD")], { stdio: "pipe" });
 
   assert.match(pkgbuild, /^pkgname=kde-rice-git$/m);
-  assert.match(pkgbuild, /'klassy'/);
+  assert.match(pkgbuild, /'kwin-effect-rounded-corners-git'/);
   assert.match(pkgbuild, /git\+https:\/\/github\.com\/0916dhkim\/kde-rice\.git/);
   assert.match(srcinfo, /^pkgbase = kde-rice-git$/m);
   assert.match(srcinfo, /^pkgname = kde-rice-git$/m);
-  assert.match(srcinfo, /\tdepends = klassy$/m);
+  assert.match(srcinfo, /\tdepends = kwin-effect-rounded-corners-git$/m);
   assert.match(srcinfo, /source = kde-rice::git\+https:\/\/github\.com\/0916dhkim\/kde-rice\.git/);
 });
 

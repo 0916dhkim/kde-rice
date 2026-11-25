@@ -1,0 +1,20 @@
+{
+    "KPackageStructure": "KWin/Script",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "0916dhkim@gmail.com",
+                "Name": "Danny Kim"
+            }
+        ],
+        "Description": "Hide server-side window titlebars and borders on all normal windows and dialogs",
+        "EnabledByDefault": true,
+        "Icon": "preferences-system-windows",
+        "Id": "nordic-notitlebar",
+        "License": "MIT",
+        "Name": "Nordic Borderless Windows",
+        "Version": "0.1.0",
+        "Website": "https://github.com/0916dhkim/kde-rice"
+    },
+    "X-Plasma-API": "javascript"
+}

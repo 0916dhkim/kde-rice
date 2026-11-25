@@ -1,5 +1,5 @@
 [kdeglobals][KDE]
-widgetStyle=Klassy
+widgetStyle=Breeze
 
 [kdeglobals][General]
 ColorScheme=NordicMinimal
@@ -14,5 +14,5 @@ name=nordic-glass
 Image=NordicMist
 
 [kwinrc][org.kde.kdecoration2]
-library=org.kde.klassy
-theme=Klassy
+library=org.kde.breeze
+theme=Breeze
