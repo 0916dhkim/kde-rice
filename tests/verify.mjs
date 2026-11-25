@@ -102,6 +102,7 @@ test("panel-background and dialog SVGs contain required 9-slice, mask, shadow, a
     ...nineParts.map((p) => `shadow-${p}`),
     "hint-top-margin", "hint-bottom-margin", "hint-left-margin", "hint-right-margin",
     "shadow-hint-top-margin", "shadow-hint-bottom-margin", "shadow-hint-left-margin", "shadow-hint-right-margin",
+    "shadow-hint-top-inset", "shadow-hint-bottom-inset", "shadow-hint-left-inset", "shadow-hint-right-inset",
     "hint-stretch-borders",
   ];
   const floatingRequired = [

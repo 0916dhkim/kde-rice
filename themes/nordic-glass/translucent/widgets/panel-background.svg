@@ -1,37 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="260" height="180" viewBox="0 0 260 180">
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="190" viewBox="0 0 280 190">
   <defs>
     <linearGradient id="shTop" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0%" stop-color="#000000" stop-opacity="0.26"/>
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.30"/>
+      <stop offset="45%" stop-color="#000000" stop-opacity="0.09"/>
       <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="shBottom" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#000000" stop-opacity="0.48"/>
-      <stop offset="55%" stop-color="#000000" stop-opacity="0.17"/>
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.42"/>
+      <stop offset="45%" stop-color="#000000" stop-opacity="0.13"/>
       <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="shLeft" x1="1" y1="0" x2="0" y2="0">
-      <stop offset="0%" stop-color="#000000" stop-opacity="0.31"/>
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.34"/>
+      <stop offset="45%" stop-color="#000000" stop-opacity="0.10"/>
       <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="shRight" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#000000" stop-opacity="0.31"/>
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.34"/>
+      <stop offset="45%" stop-color="#000000" stop-opacity="0.10"/>
       <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
     </linearGradient>
-    <radialGradient id="shTL" cx="1" cy="1" r="1">
-      <stop offset="0%" stop-color="#000000" stop-opacity="0.26"/>
+    <radialGradient id="shTL" gradientUnits="userSpaceOnUse" cx="191" cy="31" r="21">
+      <stop offset="52.4%" stop-color="#000000" stop-opacity="0.32"/>
+      <stop offset="73.8%" stop-color="#000000" stop-opacity="0.09"/>
       <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="shTR" cx="0" cy="1" r="1">
-      <stop offset="0%" stop-color="#000000" stop-opacity="0.26"/>
+    <radialGradient id="shTR" gradientUnits="userSpaceOnUse" cx="225" cy="31" r="21">
+      <stop offset="52.4%" stop-color="#000000" stop-opacity="0.32"/>
+      <stop offset="73.8%" stop-color="#000000" stop-opacity="0.09"/>
       <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="shBL" cx="1" cy="0" r="1">
-      <stop offset="0%" stop-color="#000000" stop-opacity="0.48"/>
+    <radialGradient id="shBL" gradientUnits="userSpaceOnUse" cx="191" cy="65" r="21">
+      <stop offset="52.4%" stop-color="#000000" stop-opacity="0.42"/>
+      <stop offset="73.8%" stop-color="#000000" stop-opacity="0.12"/>
       <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="shBR" cx="0" cy="0" r="1">
-      <stop offset="0%" stop-color="#000000" stop-opacity="0.48"/>
+    <radialGradient id="shBR" gradientUnits="userSpaceOnUse" cx="225" cy="65" r="21">
+      <stop offset="52.4%" stop-color="#000000" stop-opacity="0.42"/>
+      <stop offset="73.8%" stop-color="#000000" stop-opacity="0.12"/>
       <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
     </radialGradient>
   </defs>
@@ -76,63 +83,105 @@
     <path d="M 65,54 L 66,54 L 66,55 A 11,11 0 0 1 55,66 L 54,66 L 54,65 L 55,65 A 10,10 0 0 0 65,55 Z" fill="#bad2ee" fill-opacity="0.17"/>
   </g>
 
-  <!-- Blur mask 9-slice frame (exact rounded silhouette) -->
+  <!-- Blur mask 9-slice frame (1px inset from border to avoid HiDPI blur corner bleed) -->
   <g id="mask-topleft">
     <rect x="90" y="10" width="12" height="12" fill="none"/>
-    <path d="M 90,21 A 11,11 0 0 1 101,10 L 102,10 L 102,22 L 90,22 Z" fill="#000000"/>
+    <path d="M 91,21 A 10,10 0 0 1 101,11 L 102,11 L 102,22 L 91,22 Z" fill="#000000"/>
   </g>
-  <rect id="mask-top" x="102" y="10" width="32" height="12" fill="#000000"/>
+  <g id="mask-top">
+    <rect x="102" y="10" width="32" height="12" fill="none"/>
+    <rect x="102" y="11" width="32" height="11" fill="#000000"/>
+  </g>
   <g id="mask-topright">
     <rect x="134" y="10" width="12" height="12" fill="none"/>
-    <path d="M 134,10 L 135,10 A 11,11 0 0 1 146,21 L 146,22 L 134,22 Z" fill="#000000"/>
+    <path d="M 134,11 L 135,11 A 10,10 0 0 1 145,21 L 145,22 L 134,22 Z" fill="#000000"/>
   </g>
-  <rect id="mask-left" x="90" y="22" width="12" height="32" fill="#000000"/>
+  <g id="mask-left">
+    <rect x="90" y="22" width="12" height="32" fill="none"/>
+    <rect x="91" y="22" width="11" height="32" fill="#000000"/>
+  </g>
   <rect id="mask-center" x="102" y="22" width="32" height="32" fill="#000000"/>
-  <rect id="mask-right" x="134" y="22" width="12" height="32" fill="#000000"/>
+  <g id="mask-right">
+    <rect x="134" y="22" width="12" height="32" fill="none"/>
+    <rect x="134" y="22" width="11" height="32" fill="#000000"/>
+  </g>
   <g id="mask-bottomleft">
     <rect x="90" y="54" width="12" height="12" fill="none"/>
-    <path d="M 90,54 L 102,54 L 102,66 L 101,66 A 11,11 0 0 1 90,55 Z" fill="#000000"/>
+    <path d="M 91,54 L 102,54 L 102,65 L 101,65 A 10,10 0 0 1 91,55 Z" fill="#000000"/>
   </g>
-  <rect id="mask-bottom" x="102" y="54" width="32" height="12" fill="#000000"/>
+  <g id="mask-bottom">
+    <rect x="102" y="54" width="32" height="12" fill="none"/>
+    <rect x="102" y="54" width="32" height="11" fill="#000000"/>
+  </g>
   <g id="mask-bottomright">
     <rect x="134" y="54" width="12" height="12" fill="none"/>
-    <path d="M 134,54 L 146,54 L 146,55 A 11,11 0 0 1 135,66 L 134,66 Z" fill="#000000"/>
+    <path d="M 134,54 L 145,54 L 145,55 A 10,10 0 0 1 135,65 L 134,65 Z" fill="#000000"/>
   </g>
 
-  <!-- Elevation shadow 9-slice frame -->
-  <rect id="shadow-topleft" x="170" y="10" width="14" height="14" fill="url(#shTL)"/>
-  <rect id="shadow-top" x="184" y="10" width="32" height="14" fill="url(#shTop)"/>
-  <rect id="shadow-topright" x="216" y="10" width="14" height="14" fill="url(#shTR)"/>
-  <rect id="shadow-left" x="170" y="24" width="14" height="32" fill="url(#shLeft)"/>
-  <rect id="shadow-center" x="184" y="24" width="32" height="32" fill="#000000" fill-opacity="0"/>
-  <rect id="shadow-right" x="216" y="24" width="14" height="32" fill="url(#shRight)"/>
-  <rect id="shadow-bottomleft" x="170" y="56" width="14" height="14" fill="url(#shBL)"/>
-  <rect id="shadow-bottom" x="184" y="56" width="32" height="14" fill="url(#shBottom)"/>
-  <rect id="shadow-bottomright" x="216" y="56" width="14" height="14" fill="url(#shBR)"/>
+  <!-- Elevation shadow 9-slice frame (Breeze-compliant SC x SC corners with rounded cutout + inset hints) -->
+  <g id="shadow-topleft">
+    <rect x="170" y="10" width="22" height="22" fill="none"/>
+    <path d="M 170,31 A 21,21 0 0 1 191,10 L 192,10 L 192,20 L 191,20 A 11,11 0 0 0 180,31 L 180,32 L 170,32 Z" fill="url(#shTL)"/>
+  </g>
+  <g id="shadow-top">
+    <rect x="192" y="10" width="32" height="22" fill="none"/>
+    <rect x="192" y="10" width="32" height="10" fill="url(#shTop)"/>
+  </g>
+  <g id="shadow-topright">
+    <rect x="224" y="10" width="22" height="22" fill="none"/>
+    <path d="M 224,10 L 225,10 A 21,21 0 0 1 246,31 L 246,32 L 236,32 L 236,31 A 11,11 0 0 0 225,20 L 224,20 Z" fill="url(#shTR)"/>
+  </g>
+  <g id="shadow-left">
+    <rect x="170" y="32" width="22" height="32" fill="none"/>
+    <rect x="170" y="32" width="10" height="32" fill="url(#shLeft)"/>
+  </g>
+  <rect id="shadow-center" x="192" y="32" width="32" height="32" fill="#000000" fill-opacity="0"/>
+  <g id="shadow-right">
+    <rect x="224" y="32" width="22" height="32" fill="none"/>
+    <rect x="236" y="32" width="10" height="32" fill="url(#shRight)"/>
+  </g>
+  <g id="shadow-bottomleft">
+    <rect x="170" y="64" width="22" height="22" fill="none"/>
+    <path d="M 170,64 L 180,64 L 180,65 A 11,11 0 0 0 191,76 L 192,76 L 192,86 L 191,86 A 21,21 0 0 1 170,65 Z" fill="url(#shBL)"/>
+  </g>
+  <g id="shadow-bottom">
+    <rect x="192" y="64" width="32" height="22" fill="none"/>
+    <rect x="192" y="76" width="32" height="10" fill="url(#shBottom)"/>
+  </g>
+  <g id="shadow-bottomright">
+    <rect x="224" y="64" width="22" height="22" fill="none"/>
+    <path d="M 236,64 L 246,64 L 246,65 A 21,21 0 0 1 225,86 L 224,86 L 224,76 L 225,76 A 11,11 0 0 0 236,65 Z" fill="url(#shBR)"/>
+  </g>
 
-  <rect id="shadow-hint-top-margin" x="170" y="92" width="4" height="8" fill="#bf616a"/>
-  <rect id="shadow-hint-bottom-margin" x="178" y="92" width="4" height="14" fill="#bf616a"/>
-  <rect id="shadow-hint-left-margin" x="186" y="92" width="12" height="4" fill="#bf616a"/>
-  <rect id="shadow-hint-right-margin" x="202" y="92" width="12" height="4" fill="#bf616a"/>
+  <!-- Shadow margins & matching shadow insets -->
+  <rect id="shadow-hint-top-margin" x="170" y="96" width="4" height="10" fill="#bf616a"/>
+  <rect id="shadow-hint-bottom-margin" x="178" y="96" width="4" height="10" fill="#bf616a"/>
+  <rect id="shadow-hint-left-margin" x="186" y="96" width="10" height="4" fill="#bf616a"/>
+  <rect id="shadow-hint-right-margin" x="200" y="96" width="10" height="4" fill="#bf616a"/>
+
+  <rect id="shadow-hint-top-inset" x="170" y="112" width="4" height="10" fill="#d08770"/>
+  <rect id="shadow-hint-bottom-inset" x="178" y="112" width="4" height="10" fill="#d08770"/>
+  <rect id="shadow-hint-left-inset" x="186" y="112" width="10" height="4" fill="#d08770"/>
+  <rect id="shadow-hint-right-inset" x="200" y="112" width="10" height="4" fill="#d08770"/>
 
   <!-- Content padding hints -->
-  <rect id="hint-top-margin" x="10" y="92" width="4" height="4" fill="#ebcb8b"/>
-  <rect id="hint-bottom-margin" x="18" y="92" width="4" height="4" fill="#ebcb8b"/>
-  <rect id="hint-left-margin" x="26" y="92" width="8" height="4" fill="#ebcb8b"/>
-  <rect id="hint-right-margin" x="40" y="92" width="8" height="4" fill="#ebcb8b"/>
-  <rect id="hint-stretch-borders" x="56" y="92" width="2" height="2" fill="#b48ead"/>
+  <rect id="hint-top-margin" x="10" y="96" width="4" height="4" fill="#ebcb8b"/>
+  <rect id="hint-bottom-margin" x="18" y="96" width="4" height="4" fill="#ebcb8b"/>
+  <rect id="hint-left-margin" x="26" y="96" width="8" height="4" fill="#ebcb8b"/>
+  <rect id="hint-right-margin" x="40" y="96" width="8" height="4" fill="#ebcb8b"/>
+  <rect id="hint-stretch-borders" x="56" y="96" width="2" height="2" fill="#b48ead"/>
 
   <!-- Floating panel inset hints (10px margin) -->
-  <rect id="floating-center" x="10" y="128" width="32" height="32" fill="#141a24" fill-opacity="0.74"/>
-  <rect id="floating-hint-top-margin" x="52" y="128" width="4" height="10" fill="#88c0d0"/>
-  <rect id="floating-hint-bottom-margin" x="60" y="128" width="4" height="10" fill="#88c0d0"/>
-  <rect id="floating-hint-left-margin" x="68" y="128" width="10" height="4" fill="#88c0d0"/>
-  <rect id="floating-hint-right-margin" x="82" y="128" width="10" height="4" fill="#88c0d0"/>
+  <rect id="floating-center" x="10" y="138" width="32" height="32" fill="#141a24" fill-opacity="0.74"/>
+  <rect id="floating-hint-top-margin" x="52" y="138" width="4" height="10" fill="#88c0d0"/>
+  <rect id="floating-hint-bottom-margin" x="60" y="138" width="4" height="10" fill="#88c0d0"/>
+  <rect id="floating-hint-left-margin" x="68" y="138" width="10" height="4" fill="#88c0d0"/>
+  <rect id="floating-hint-right-margin" x="82" y="138" width="10" height="4" fill="#88c0d0"/>
 
   <!-- Thick panel hints -->
-  <rect id="thick-center" x="110" y="128" width="32" height="32" fill="#141a24" fill-opacity="0.74"/>
-  <rect id="thick-hint-top-margin" x="150" y="128" width="4" height="6" fill="#a3be8c"/>
-  <rect id="thick-hint-bottom-margin" x="158" y="128" width="4" height="6" fill="#a3be8c"/>
-  <rect id="thick-hint-left-margin" x="166" y="128" width="10" height="4" fill="#a3be8c"/>
-  <rect id="thick-hint-right-margin" x="180" y="128" width="10" height="4" fill="#a3be8c"/>
+  <rect id="thick-center" x="110" y="138" width="32" height="32" fill="#141a24" fill-opacity="0.74"/>
+  <rect id="thick-hint-top-margin" x="150" y="138" width="4" height="6" fill="#a3be8c"/>
+  <rect id="thick-hint-bottom-margin" x="158" y="138" width="4" height="6" fill="#a3be8c"/>
+  <rect id="thick-hint-left-margin" x="166" y="138" width="10" height="4" fill="#a3be8c"/>
+  <rect id="thick-hint-right-margin" x="180" y="138" width="10" height="4" fill="#a3be8c"/>
 </svg>

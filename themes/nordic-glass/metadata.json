@@ -12,7 +12,7 @@
         "Id": "nordic-glass",
         "License": "MIT",
         "Name": "Nordic Glass",
-        "Version": "0.1.0",
+        "Version": "0.1.1",
         "Website": "https://github.com/0916dhkim/kde-rice"
     },
     "X-Plasma-API": "6.0"
