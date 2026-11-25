@@ -63,6 +63,27 @@
     const systray = topBar.addWidget("org.kde.plasma.systemtray");
     systray.currentConfigGroup = ["General"];
     systray.writeConfig("iconSpacing", 1);
+    systray.writeConfig("scaleIconsToFit", true);
+    systray.writeConfig("showAllItems", false);
+    systray.writeConfig("hiddenItems", [
+        "org.kde.plasma.clipboard",
+        "org.kde.plasma.brightness",
+        "org.kde.plasma.volume",
+        "org.kde.plasma.battery",
+        "org.kde.plasma.manage-inputmethod",
+        "org.kde.plasma.keyboardlayout",
+        "org.kde.plasma.keyboardindicator",
+        "org.kde.plasma.mediacontroller",
+        "org.kde.plasma.vault",
+        "org.kde.kdeconnect",
+        "org.kde.kscreen",
+        "org.kde.plasma.weather",
+        "org.kde.plasma.printmanager",
+        "org.kde.plasma.devicenotifier",
+        "org.kde.plasma.cameraindicator",
+        "Slack",
+        "slack"
+    ]);
 
     // 2. Centered Floating Nordic Bottom App Dock (autohide overlay; windows do not avoid it)
     const dock = new Panel();

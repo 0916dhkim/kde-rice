@@ -9,6 +9,7 @@ license=('MIT')
 depends=(
     'plasma-workspace'
     'plasma-desktop'
+    'plasma-pa'
     'libksysguard'
     'kwin-effect-rounded-corners-git'
 )

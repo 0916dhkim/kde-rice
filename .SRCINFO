@@ -8,6 +8,7 @@ pkgbase = kde-rice-git
 	makedepends = git
 	depends = plasma-workspace
 	depends = plasma-desktop
+	depends = plasma-pa
 	depends = libksysguard
 	depends = kwin-effect-rounded-corners-git
 	provides = kde-rice

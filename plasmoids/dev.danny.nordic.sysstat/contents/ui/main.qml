@@ -5,14 +5,17 @@ import QtQuick.Layouts
 import QtQuick.Controls as QQC2
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
-import org.kde.kirigami as Kirigami
 import org.kde.ksysguard.sensors as Sensors
+import org.kde.plasma.private.battery as BatteryControl
+import org.kde.plasma.private.volume as PlasmaPA
 
 PlasmoidItem {
     id: root
 
     preferredRepresentation: fullRepresentation
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
+
+    readonly property real paNormalVolume: 65536.0
 
     Sensors.Sensor {
         id: cpuSensor
@@ -26,37 +29,116 @@ PlasmoidItem {
         enabled: true
     }
 
+    BatteryControl.BatteryControlModel {
+        id: batteryModel
+    }
+
     readonly property int cpuPct: isNaN(Number(cpuSensor.value)) ? 0 : Math.round(Number(cpuSensor.value))
     readonly property int memPct: isNaN(Number(memSensor.value)) ? 0 : Math.round(Number(memSensor.value))
 
+    readonly property var defaultSink: PlasmaPA.PreferredDevice.sink
+    readonly property bool hasAudio: defaultSink !== null && defaultSink !== undefined
+    readonly property bool isMuted: hasAudio ? Boolean(defaultSink.muted) : false
+    readonly property int volPct: hasAudio
+        ? Math.max(0, Math.round((Number(defaultSink.volume) / paNormalVolume) * 100))
+        : 0
+
+    readonly property bool hasBattery: batteryModel.hasBatteries
+    readonly property int batPct: Math.max(0, Math.min(100, batteryModel.percent))
+    readonly property bool batPluggedIn: batteryModel.pluggedIn
+    readonly property color batColor: {
+        if (batPluggedIn) {
+            return "#88c0d0";
+        }
+        if (batPct <= 12) {
+            return "#bf616a";
+        }
+        if (batPct <= 25) {
+            return "#ebcb8b";
+        }
+        return "#a3be8c";
+    }
+
+    function adjustVolume(deltaPct: int): void {
+        if (!hasAudio) {
+            return;
+        }
+        const nextPct = Math.max(0, Math.min(100, volPct + deltaPct));
+        defaultSink.volume = Math.round((nextPct / 100.0) * paNormalVolume);
+        if (nextPct > 0 && defaultSink.muted) {
+            defaultSink.muted = false;
+        }
+    }
+
+    function toggleMute(): void {
+        if (!hasAudio) {
+            return;
+        }
+        defaultSink.muted = !defaultSink.muted;
+    }
+
+    function formatRemaining(ms: real): string {
+        if (!ms || ms <= 0) {
+            return "";
+        }
+        const totalMin = Math.round(ms / 60000);
+        const h = Math.floor(totalMin / 60);
+        const m = totalMin % 60;
+        return h > 0 ? (h + "h " + m + "m") : (m + "m");
+    }
+
     fullRepresentation: Item {
-        implicitWidth: statRow.implicitWidth + 8
+        implicitWidth: statusRow.implicitWidth + 8
         implicitHeight: 24
         Layout.minimumWidth: implicitWidth
         Layout.preferredWidth: implicitWidth
         Layout.fillHeight: true
 
         RowLayout {
-            id: statRow
+            id: statusRow
             anchors.centerIn: parent
-            spacing: 5
+            spacing: 11
 
-            Kirigami.Icon {
-                source: "cpu-symbolic"
-                isMask: true
-                implicitWidth: 14
-                implicitHeight: 14
-                color: root.cpuPct >= 80 ? "#ebcb8b" : Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.78)
+            // CPU chip + percentage
+            Item {
+                implicitWidth: cpuRow.implicitWidth
+                implicitHeight: 22
                 Layout.alignment: Qt.AlignVCenter
-            }
 
-            Text {
-                text: root.cpuPct + "%"
-                color: root.cpuPct >= 80 ? "#ebcb8b" : Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.84)
-                font.pixelSize: 12
-                font.weight: Font.Medium
-                font.family: "monospace"
-                Layout.alignment: Qt.AlignVCenter
+                RowLayout {
+                    id: cpuRow
+                    anchors.centerIn: parent
+                    spacing: 5
+
+                    Image {
+                        source: Qt.resolvedUrl("icons/cpu.svg")
+                        sourceSize.width: 14
+                        sourceSize.height: 14
+                        Layout.preferredWidth: 14
+                        Layout.preferredHeight: 14
+                        smooth: true
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+
+                    Text {
+                        text: root.cpuPct + "%"
+                        color: root.cpuPct >= 80 ? "#ebcb8b" : Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.84)
+                        font.pixelSize: 12
+                        font.weight: Font.Medium
+                        font.family: "monospace"
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+                }
+
+                MouseArea {
+                    id: cpuMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                }
+
+                QQC2.ToolTip.visible: cpuMouse.containsMouse
+                QQC2.ToolTip.delay: 300
+                QQC2.ToolTip.text: "CPU: " + root.cpuPct + "%  ·  Memory: " + root.memPct + "%"
             }
 
             Rectangle {
@@ -64,18 +146,140 @@ PlasmoidItem {
                 implicitHeight: 14
                 color: Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.16)
                 Layout.alignment: Qt.AlignVCenter
-                Layout.leftMargin: 5
+            }
+
+            // Inline Volume icon + percentage (scroll to adjust, click to mute)
+            Item {
+                visible: root.hasAudio
+                implicitWidth: volRow.implicitWidth
+                implicitHeight: 22
+                Layout.alignment: Qt.AlignVCenter
+
+                RowLayout {
+                    id: volRow
+                    anchors.centerIn: parent
+                    spacing: 4
+
+                    Image {
+                        source: Qt.resolvedUrl(root.isMuted || root.volPct === 0 ? "icons/volume-muted.svg" : "icons/volume.svg")
+                        sourceSize.width: 15
+                        sourceSize.height: 15
+                        Layout.preferredWidth: 15
+                        Layout.preferredHeight: 15
+                        smooth: true
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+
+                    Text {
+                        text: root.isMuted ? "mute" : (root.volPct + "%")
+                        color: root.isMuted ? "#bf616a" : Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.84)
+                        font.pixelSize: 12
+                        font.weight: Font.Medium
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+                }
+
+                MouseArea {
+                    id: volMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.toggleMute()
+                }
+
+                WheelHandler {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    onWheel: function(event) {
+                        if (event.angleDelta.y > 0) {
+                            root.adjustVolume(5);
+                        } else if (event.angleDelta.y < 0) {
+                            root.adjustVolume(-5);
+                        }
+                    }
+                }
+
+                QQC2.ToolTip.visible: volMouse.containsMouse
+                QQC2.ToolTip.delay: 300
+                QQC2.ToolTip.text: (root.isMuted ? "Muted" : ("Volume: " + root.volPct + "%")) + " (scroll to adjust, click to mute)"
+            }
+
+            // Sage-green live-fill Battery + percentage
+            Item {
+                visible: root.hasBattery
+                implicitWidth: batRow.implicitWidth
+                implicitHeight: 22
+                Layout.alignment: Qt.AlignVCenter
+
+                RowLayout {
+                    id: batRow
+                    anchors.centerIn: parent
+                    spacing: 5
+
+                    Item {
+                        implicitWidth: 21
+                        implicitHeight: 12
+                        Layout.alignment: Qt.AlignVCenter
+
+                        Rectangle {
+                            x: 0
+                            y: 0
+                            width: 18
+                            height: 12
+                            radius: 3
+                            color: "transparent"
+                            border.width: 1.4
+                            border.color: root.batColor
+
+                            Rectangle {
+                                x: 2.5
+                                y: 2.5
+                                width: Math.max(2, Math.round(13 * (root.batPct / 100.0)))
+                                height: 7
+                                radius: 1.2
+                                color: root.batColor
+                            }
+                        }
+
+                        Rectangle {
+                            x: 19.2
+                            y: 3.8
+                            width: 1.8
+                            height: 4.4
+                            radius: 0.9
+                            color: root.batColor
+                        }
+                    }
+
+                    Text {
+                        text: root.batPct + "%"
+                        color: root.batColor
+                        font.pixelSize: 12
+                        font.weight: Font.Medium
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+                }
+
+                MouseArea {
+                    id: batMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                }
+
+                QQC2.ToolTip.visible: batMouse.containsMouse
+                QQC2.ToolTip.delay: 300
+                QQC2.ToolTip.text: {
+                    const rem = root.formatRemaining(batteryModel.smoothedRemainingMsec);
+                    const state = root.batPluggedIn ? "Plugged in" : "On battery";
+                    return "Battery: " + root.batPct + "% · " + state + (rem ? (" (" + rem + ")") : "");
+                }
+            }
+
+            Rectangle {
+                implicitWidth: 1
+                implicitHeight: 14
+                color: Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.16)
+                Layout.alignment: Qt.AlignVCenter
             }
         }
-
-        MouseArea {
-            id: statMouse
-            anchors.fill: parent
-            hoverEnabled: true
-        }
-
-        QQC2.ToolTip.visible: statMouse.containsMouse
-        QQC2.ToolTip.delay: 300
-        QQC2.ToolTip.text: "CPU: " + root.cpuPct + "%  ·  Memory: " + root.memPct + "%"
     }
 }
