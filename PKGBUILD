@@ -10,6 +10,7 @@ depends=(
     'plasma-workspace'
     'plasma-desktop'
     'libksysguard'
+    'klassy'
 )
 makedepends=('git')
 provides=('kde-rice')
@@ -45,9 +46,9 @@ package() {
     install -d "$pkgdir/usr/share/wallpapers"
     cp -r wallpapers/NordicMist "$pkgdir/usr/share/wallpapers/"
 
-    # KWin 6 borderless windows script
-    install -d "$pkgdir/usr/share/kwin/scripts"
-    cp -r kwin/scripts/nordic-notitlebar "$pkgdir/usr/share/kwin/scripts/"
+    # Klassy Nordic Minimal window decoration preset
+    install -Dm644 klassy/Nordic_Minimal.klpw \
+        "$pkgdir/usr/share/kde-rice/Nordic_Minimal.klpw"
 
     # Normalize permissions cleanly for system installation
     find "$pkgdir/usr/share" -type d -exec chmod 755 {} +

@@ -72,15 +72,19 @@ test("Global Theme (look-and-feel) and Wallpaper KPackages are valid", () => {
   assert.equal(lnfMeta.KPlugin?.Id, "dev.danny.nordic");
 
   const defaults = readFileSync(join(lnfDir, "contents/defaults"), "utf8");
+  assert.match(defaults, /widgetStyle=Klassy/);
   assert.match(defaults, /ColorScheme=NordicMinimal/);
   assert.match(defaults, /name=nordic-glass/);
   assert.match(defaults, /Image=NordicMist/);
+  assert.match(defaults, /library=org\.kde\.klassy/);
+  assert.match(defaults, /theme=Klassy/);
 
   assert.ok(existsSync(join(lnfDir, "contents/previews/preview.png")));
   assert.ok(existsSync(join(lnfDir, "contents/previews/fullscreenpreview.jpg")));
 
   const layoutDefaults = readFileSync(join(lnfDir, "contents/layouts/defaults"), "utf8");
-  assert.match(layoutDefaults, /BorderlessMaximizedWindows=true/);
+  assert.match(layoutDefaults, /ButtonsOnRight=IAX/);
+  assert.match(layoutDefaults, /BorderlessMaximizedWindows=false/);
 
   const wallMeta = JSON.parse(readFileSync(join(ROOT, "wallpapers/NordicMist/metadata.json"), "utf8"));
   assert.equal(wallMeta.KPlugin?.Id, "NordicMist");
@@ -276,50 +280,14 @@ test("Global Theme desktop-layout.js builds top floating bar + bottom autohide f
   assert.ok(Array.isArray(res2.created[1]._widgets[0]._cfg["General:launchers"]));
 });
 
-test("KWin 6 nordic-notitlebar script hides titlebars on normal/dialog windows only", () => {
-  const kwinDir = join(ROOT, "kwin/scripts/nordic-notitlebar");
-  const meta = JSON.parse(readFileSync(join(kwinDir, "metadata.json"), "utf8"));
-  assert.equal(meta.KPackageStructure, "KWin/Script");
-  assert.equal(meta.KPlugin?.Id, "nordic-notitlebar");
-  assert.equal(meta.KPlugin?.EnabledByDefault, true);
-  assert.equal(meta["X-Plasma-API"], "javascript");
-
-  const src = readFileSync(join(kwinDir, "contents/code/main.js"), "utf8");
-  let addedHandler = null;
-  const makeWin = (props) => {
-    let fsCb = null;
-    return {
-      noBorder: false,
-      fullScreen: false,
-      fullScreenChanged: { connect: (cb) => { fsCb = cb; } },
-      _triggerFs: (v) => { w.fullScreen = v; if (fsCb) fsCb(); },
-      ...props,
-    };
-  };
-  const normal = makeWin({ normalWindow: true });
-  const dialog = makeWin({ dialog: true });
-  const dock = makeWin({ dock: true, normalWindow: false });
-  const desktop = makeWin({ desktopWindow: true, normalWindow: false });
-  const popup = makeWin({ popupWindow: true, normalWindow: false });
-  const addedNormal = makeWin({ normalWindow: true });
-
-  const sandbox = {
-    workspace: {
-      windowAdded: { connect: (fn) => { addedHandler = fn; } },
-      windowList: () => [normal, dialog, dock, desktop, popup],
-    },
-  };
-  vm.runInNewContext(src, sandbox);
-
-  assert.equal(normal.noBorder, true);
-  assert.equal(dialog.noBorder, true);
-  assert.equal(dock.noBorder, false);
-  assert.equal(desktop.noBorder, false);
-  assert.equal(popup.noBorder, false);
-
-  assert.equal(typeof addedHandler, "function");
-  addedHandler(addedNormal);
-  assert.equal(addedNormal.noBorder, true);
+test("Klassy Nordic Minimal preset is valid", () => {
+  const preset = readFileSync(join(ROOT, "klassy/Nordic_Minimal.klpw"), "utf8");
+  assert.match(preset, /^\[Klassy Window Decoration Preset File\]/m);
+  assert.match(preset, /^\[Windeco Preset Nordic Minimal\]/m);
+  assert.match(preset, /^WindowCornerRadius=10$/m);
+  assert.match(preset, /^WindowOutlineStyleActive=WindowOutlineAccentColor$/m);
+  assert.match(preset, /^WindowOutlineThickness=1$/m);
+  assert.match(preset, /^KwinButtonsOnRight=IAX$/m);
 });
 
 test("PKGBUILD and .SRCINFO are valid and consistent", () => {
@@ -328,9 +296,11 @@ test("PKGBUILD and .SRCINFO are valid and consistent", () => {
   execFileSync("bash", ["-n", join(ROOT, "PKGBUILD")], { stdio: "pipe" });
 
   assert.match(pkgbuild, /^pkgname=kde-rice-git$/m);
+  assert.match(pkgbuild, /'klassy'/);
   assert.match(pkgbuild, /git\+https:\/\/github\.com\/0916dhkim\/kde-rice\.git/);
   assert.match(srcinfo, /^pkgbase = kde-rice-git$/m);
   assert.match(srcinfo, /^pkgname = kde-rice-git$/m);
+  assert.match(srcinfo, /\tdepends = klassy$/m);
   assert.match(srcinfo, /source = kde-rice::git\+https:\/\/github\.com\/0916dhkim\/kde-rice\.git/);
 });
 
