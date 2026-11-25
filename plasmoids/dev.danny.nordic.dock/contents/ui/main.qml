@@ -4,7 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
-import org.kde.plasma.components as PlasmaComponents
+import org.kde.plasma.extras as PlasmaExtras
 import org.kde.kirigami as Kirigami
 import org.kde.taskmanager as TaskManager
 
@@ -284,7 +284,9 @@ PlasmoidItem {
                     tasksModel.requestNewInstance(tasksModel.makeModelIndex(clickedRow));
                 } else if (mouse.button === Qt.RightButton) {
                     root.menuRow = clickedRow;
-                    contextMenu.popup();
+                    const targetItem = taskRepeater.itemAt(clickedRow);
+                    contextMenu.visualParent = targetItem ? targetItem : dockRoot;
+                    contextMenu.openRelative();
                 }
             }
 
@@ -465,12 +467,18 @@ PlasmoidItem {
             }
         }
 
-        // Single shared context menu for right-click on any dock slot
-        PlasmaComponents.Menu {
+        // Native Wayland xdg_popup QMenu (floats cleanly above the 58px dock with no clipping or scrollbar)
+        PlasmaExtras.Menu {
             id: contextMenu
+            visualParent: dockRoot
+            placement: PlasmaExtras.Menu.TopPosedLeftAlignedPopup
 
             readonly property bool validRow: root.menuRow >= 0 && root.menuRow < tasksModel.count
             readonly property var rowIdx: validRow ? tasksModel.makeModelIndex(root.menuRow) : null
+            readonly property string rowAppName: validRow
+                ? String(tasksModel.data(rowIdx, TaskManager.AbstractTasksModel.AppName)
+                         || tasksModel.data(rowIdx, Qt.DisplayRole) || "")
+                : ""
             readonly property bool rowPinned: validRow ? root.isRowPinned(root.menuRow) : false
             readonly property bool rowRunning: validRow
                 ? (Boolean(tasksModel.data(rowIdx, TaskManager.AbstractTasksModel.IsWindow))
@@ -486,9 +494,15 @@ PlasmoidItem {
                 ? tasksModel.data(rowIdx, TaskManager.AbstractTasksModel.LauncherUrlWithoutIcon)
                 : ""
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
+                section: true
+                text: contextMenu.rowAppName
+                visible: contextMenu.rowAppName.length > 0
+            }
+
+            PlasmaExtras.MenuItem {
                 text: "New Window"
-                icon.name: "window-new"
+                icon: "window-new"
                 enabled: contextMenu.validRow
                 onClicked: {
                     if (contextMenu.validRow) {
@@ -497,9 +511,9 @@ PlasmoidItem {
                 }
             }
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
                 text: contextMenu.rowPinned ? "Unpin from Dock" : "Pin to Dock"
-                icon.name: contextMenu.rowPinned ? "window-unpin" : "window-pin"
+                icon: contextMenu.rowPinned ? "window-unpin" : "window-pin"
                 enabled: contextMenu.validRow && contextMenu.rowLauncherUrl !== undefined && String(contextMenu.rowLauncherUrl).length > 0
                 onClicked: {
                     if (!contextMenu.validRow) {
@@ -515,14 +529,15 @@ PlasmoidItem {
                 }
             }
 
-            PlasmaComponents.MenuSeparator {
+            PlasmaExtras.MenuItem {
+                separator: true
                 visible: contextMenu.rowRunning
             }
 
-            PlasmaComponents.MenuItem {
+            PlasmaExtras.MenuItem {
                 visible: contextMenu.rowRunning
                 text: contextMenu.rowGroup && contextMenu.rowChildren > 1 ? "Close All Windows" : "Close"
-                icon.name: "window-close"
+                icon: "window-close"
                 onClicked: {
                     if (!contextMenu.validRow) {
                         return;

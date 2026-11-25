@@ -50,6 +50,7 @@ test("all 5 Plasma 6 plasmoids have valid metadata.json and QML entrypoint", () 
     assert.doesNotMatch(qml, /import\s+org\.kde\.plasma\.core\s+\d/, `${id}: unversioned Qt6 imports`);
     assert.doesNotMatch(qml, /font\.pixelSize\s*:\s*\d+\.\d+/, `${id}: font.pixelSize must be integer`);
     assert.doesNotMatch(qml, /QQC2\.ToolTip\b/, `${id}: use PlasmaCore.ToolTipArea instead of in-window QQC2.ToolTip`);
+    assert.doesNotMatch(qml, /(PlasmaComponents|QQC2)\.Menu\b/, `${id}: use PlasmaExtras.Menu instead of in-window QQC2/PlasmaComponents.Menu`);
   }
 });
 
