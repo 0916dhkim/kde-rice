@@ -24,12 +24,13 @@ PlasmoidItem {
 
     property int dragFromIndex: -1
     property bool syncingLaunchers: false
+    property int dividerBeforeIndex: -1
 
     TaskManager.TasksModel {
         id: tasksModel
         sortMode: TaskManager.TasksModel.SortManual
         groupMode: TaskManager.TasksModel.GroupApplications
-        separateLaunchers: false
+        separateLaunchers: true
         launchInPlace: true
         filterByVirtualDesktop: false
         filterByScreen: false
@@ -44,18 +45,36 @@ PlasmoidItem {
                 Plasmoid.configuration.launchers = launcherList;
                 root.syncingLaunchers = false;
             }
+            root.refreshDivider();
         }
         // qmllint enable missing-property
+
+        onCountChanged: root.refreshDivider()
+        onDataChanged: root.refreshDivider()
+        onRowsInserted: root.refreshDivider()
+        onRowsRemoved: root.refreshDivider()
+        onRowsMoved: root.refreshDivider()
+        onModelReset: root.refreshDivider()
     }
 
-    function isRowPinned(row: int): bool {
-        if (row < 0 || row >= tasksModel.count) {
-            return false;
+    function refreshDivider(): void {
+        const total = tasksModel.count;
+        let seenPinned = false;
+        for (let i = 0; i < total; ++i) {
+            const idx = tasksModel.makeModelIndex(i);
+            const pinned = Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.IsLauncher))
+                || Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.HasLauncher));
+            if (pinned) {
+                seenPinned = true;
+            } else if (seenPinned) {
+                dividerBeforeIndex = i;
+                return;
+            }
         }
-        const idx = tasksModel.makeModelIndex(row);
-        return Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.IsLauncher))
-            || Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.HasLauncher));
+        dividerBeforeIndex = -1;
     }
+
+    Component.onCompleted: Qt.callLater(root.refreshDivider)
 
     function activateItem(row: int, isLauncher: bool, isActive: bool, isGroupParent: bool, childCount: int): void {
         const idx = tasksModel.makeModelIndex(row);
@@ -168,11 +187,7 @@ PlasmoidItem {
                     readonly property int childCount: Number(slotWrap.model.ChildCount || 0)
                     readonly property bool isRunning: isWindow || isStartup
                     readonly property bool isPinned: isLauncher || Boolean(slotWrap.model.HasLauncher)
-                    readonly property bool showLeadingDivider: tasksModel.launcherCount > 0
-                        && tasksModel.count > 1
-                        && slotWrap.index > 0
-                        && !slotWrap.isPinned
-                        && root.isRowPinned(slotWrap.index - 1)
+                    readonly property bool showLeadingDivider: slotWrap.index === root.dividerBeforeIndex
                     readonly property var launcherUrl: slotWrap.model.LauncherUrlWithoutIcon
                     readonly property string appName: String(slotWrap.model.AppName || slotWrap.model.display || "")
                     readonly property string winTitle: String(slotWrap.model.display || "")
@@ -193,7 +208,7 @@ PlasmoidItem {
                             y: root.squircleTopY + Math.round((root.squircleSize - root.dividerHeight) / 2)
                             width: 1
                             height: root.dividerHeight
-                            color: Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.18)
+                            color: Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.24)
                         }
                     }
 

@@ -23,10 +23,10 @@ PlasmoidItem {
         onTriggered: root.now = new Date()
     }
 
-    onExpandedChanged: {
-        if (expanded) {
-            shownYear = now.getFullYear();
-            shownMonth = now.getMonth();
+    onExpandedChanged: function() {
+        if (root.expanded) {
+            root.shownYear = root.now.getFullYear();
+            root.shownMonth = root.now.getMonth();
         }
     }
 
