@@ -1,0 +1,20 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "0916dhkim@gmail.com",
+                "Name": "Danny Kim"
+            }
+        ],
+        "Category": "Windows and Tasks",
+        "Description": "Compact active application name and window title for the Nordic top bar",
+        "Icon": "window",
+        "Id": "dev.danny.nordic.windowtitle",
+        "License": "MIT",
+        "Name": "Nordic Window Title",
+        "Version": "0.1.0",
+        "Website": "https://github.com/0916dhkim/kde-rice"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

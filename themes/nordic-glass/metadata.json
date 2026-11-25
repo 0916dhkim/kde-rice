@@ -1,0 +1,19 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "0916dhkim@gmail.com",
+                "Name": "Danny Kim"
+            }
+        ],
+        "Category": "",
+        "Description": "Frosted Nordic slate-glass Plasma 6 desktop theme with rounded floating panels and frost-teal task indicators",
+        "EnabledByDefault": true,
+        "Id": "nordic-glass",
+        "License": "MIT",
+        "Name": "Nordic Glass",
+        "Version": "0.1.0",
+        "Website": "https://github.com/0916dhkim/kde-rice"
+    },
+    "X-Plasma-API": "6.0"
+}

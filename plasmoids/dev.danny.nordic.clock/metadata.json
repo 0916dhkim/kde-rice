@@ -1,0 +1,20 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "0916dhkim@gmail.com",
+                "Name": "Danny Kim"
+            }
+        ],
+        "Category": "Date and Time",
+        "Description": "Minimal Nordic inline date and time with a clean calendar popup",
+        "Icon": "preferences-system-time",
+        "Id": "dev.danny.nordic.clock",
+        "License": "MIT",
+        "Name": "Nordic Clock",
+        "Version": "0.1.0",
+        "Website": "https://github.com/0916dhkim/kde-rice"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

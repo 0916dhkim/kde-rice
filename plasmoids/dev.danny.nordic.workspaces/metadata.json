@@ -1,0 +1,20 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "0916dhkim@gmail.com",
+                "Name": "Danny Kim"
+            }
+        ],
+        "Category": "Windows and Tasks",
+        "Description": "Minimal Nordic pill indicator for Plasma 6 virtual desktops",
+        "Icon": "preferences-desktop-virtual",
+        "Id": "dev.danny.nordic.workspaces",
+        "License": "MIT",
+        "Name": "Nordic Workspaces",
+        "Version": "0.1.0",
+        "Website": "https://github.com/0916dhkim/kde-rice"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

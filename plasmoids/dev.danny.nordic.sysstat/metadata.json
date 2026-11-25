@@ -1,0 +1,20 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "0916dhkim@gmail.com",
+                "Name": "Danny Kim"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "Compact Nordic CPU indicator with memory tooltip for the top bar",
+        "Icon": "cpu",
+        "Id": "dev.danny.nordic.sysstat",
+        "License": "MIT",
+        "Name": "Nordic System Stat",
+        "Version": "0.1.0",
+        "Website": "https://github.com/0916dhkim/kde-rice"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}
