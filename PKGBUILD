@@ -51,8 +51,8 @@ package() {
     install -d "$pkgdir/usr/share/icons"
     cp -a icons/nordic-icons "$pkgdir/usr/share/icons/"
 
-    # Bundled Manrope variable UI font (SIL OFL 1.1)
-    install -Dm644 fonts/manrope/Manrope.ttf "$pkgdir/usr/share/fonts/nordic-manrope/Manrope.ttf"
+    # Bundled Manrope static UI font cuts (SIL OFL 1.1; Regular/Medium/SemiBold/Bold)
+    install -Dm644 fonts/manrope/Manrope-*.ttf -t "$pkgdir/usr/share/fonts/nordic-manrope/"
     install -Dm644 fonts/manrope/OFL.txt "$pkgdir/usr/share/licenses/$pkgname/OFL-Manrope.txt"
 
     # KWin 6 borderless windows script + system-wide XDG kwinrc defaults (rounded corners + outlines + shadows)
