@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls as QQC2
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.workspace.dbus as DBus
@@ -148,7 +147,7 @@ PlasmoidItem {
                 Repeater {
                     model: vdInfo.desktopIds
 
-                    delegate: Item {
+                    delegate: PlasmaCore.ToolTipArea {
                         id: dotWrap
                         required property int index
                         required property var modelData
@@ -161,6 +160,12 @@ PlasmoidItem {
                                 ? names[index]
                                 : ("Desktop " + (index + 1));
                         }
+
+                        location: Plasmoid.location
+                        mainText: dotWrap.desktopName
+                        subText: dotWrap.isActive
+                            ? "Active workspace"
+                            : (dotWrap.isOccupied ? "Has open windows" : "Empty")
 
                         implicitWidth: dotRect.implicitWidth
                         implicitHeight: 18
@@ -176,7 +181,7 @@ PlasmoidItem {
                                 if (dotWrap.isActive) {
                                     return "#88c0d0";
                                 }
-                                if (dotMouse.containsMouse) {
+                                if (dotWrap.containsMouse || dotMouse.containsMouse) {
                                     return Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.80);
                                 }
                                 if (dotWrap.isOccupied) {
@@ -206,10 +211,6 @@ PlasmoidItem {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: root.activateDesktop(dotWrap.modelData, dotWrap.index)
                         }
-
-                        QQC2.ToolTip.visible: dotMouse.containsMouse
-                        QQC2.ToolTip.delay: 400
-                        QQC2.ToolTip.text: dotWrap.desktopName
                     }
                 }
             }

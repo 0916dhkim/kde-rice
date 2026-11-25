@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls as QQC2
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
 import org.kde.ksysguard.sensors as Sensors
@@ -100,10 +99,13 @@ PlasmoidItem {
             spacing: 11
 
             // CPU chip + percentage
-            Item {
+            PlasmaCore.ToolTipArea {
                 implicitWidth: cpuRow.implicitWidth
                 implicitHeight: 22
                 Layout.alignment: Qt.AlignVCenter
+                location: Plasmoid.location
+                mainText: "CPU " + root.cpuPct + "%"
+                subText: "Memory: " + root.memPct + "%"
 
                 RowLayout {
                     id: cpuRow
@@ -129,16 +131,6 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignVCenter
                     }
                 }
-
-                MouseArea {
-                    id: cpuMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                }
-
-                QQC2.ToolTip.visible: cpuMouse.containsMouse
-                QQC2.ToolTip.delay: 300
-                QQC2.ToolTip.text: "CPU: " + root.cpuPct + "%  ·  Memory: " + root.memPct + "%"
             }
 
             Rectangle {
@@ -149,11 +141,14 @@ PlasmoidItem {
             }
 
             // Inline Volume icon + percentage (scroll to adjust, click to mute)
-            Item {
+            PlasmaCore.ToolTipArea {
                 visible: root.hasAudio
                 implicitWidth: volRow.implicitWidth
                 implicitHeight: 22
                 Layout.alignment: Qt.AlignVCenter
+                location: Plasmoid.location
+                mainText: root.isMuted ? "Audio Muted" : ("Volume " + root.volPct + "%")
+                subText: "Scroll to adjust · Click to mute"
 
                 RowLayout {
                     id: volRow
@@ -180,9 +175,7 @@ PlasmoidItem {
                 }
 
                 MouseArea {
-                    id: volMouse
                     anchors.fill: parent
-                    hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: root.toggleMute()
                 }
@@ -197,18 +190,21 @@ PlasmoidItem {
                         }
                     }
                 }
-
-                QQC2.ToolTip.visible: volMouse.containsMouse
-                QQC2.ToolTip.delay: 300
-                QQC2.ToolTip.text: (root.isMuted ? "Muted" : ("Volume: " + root.volPct + "%")) + " (scroll to adjust, click to mute)"
             }
 
-            // Sage-green live-fill Battery + percentage
-            Item {
+            // Live-fill Battery + percentage
+            PlasmaCore.ToolTipArea {
                 visible: root.hasBattery
                 implicitWidth: batRow.implicitWidth
                 implicitHeight: 22
                 Layout.alignment: Qt.AlignVCenter
+                location: Plasmoid.location
+                mainText: "Battery " + root.batPct + "%"
+                subText: {
+                    const rem = root.formatRemaining(batteryModel.smoothedRemainingMsec);
+                    const state = root.batPluggedIn ? "Plugged in" : "On battery";
+                    return state + (rem ? (" · " + rem + " remaining") : "");
+                }
 
                 RowLayout {
                     id: batRow
@@ -257,20 +253,6 @@ PlasmoidItem {
                         font.weight: Font.Medium
                         Layout.alignment: Qt.AlignVCenter
                     }
-                }
-
-                MouseArea {
-                    id: batMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                }
-
-                QQC2.ToolTip.visible: batMouse.containsMouse
-                QQC2.ToolTip.delay: 300
-                QQC2.ToolTip.text: {
-                    const rem = root.formatRemaining(batteryModel.smoothedRemainingMsec);
-                    const state = root.batPluggedIn ? "Plugged in" : "On battery";
-                    return "Battery: " + root.batPct + "% · " + state + (rem ? (" (" + rem + ")") : "");
                 }
             }
 
