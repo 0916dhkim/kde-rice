@@ -16,7 +16,7 @@ import "../code/fuzzy.js" as Fuzzy
 PlasmoidItem {
     id: root
 
-    preferredRepresentation: compactRepresentation
+    preferredRepresentation: fullRepresentation
     Plasmoid.backgroundHints: PlasmaCore.Types.NoBackground
     activationTogglesExpanded: false
 
@@ -244,6 +244,8 @@ PlasmoidItem {
         root.selectedIndex = 0;
         root.refreshResults();
         root.launcherOpen = true;
+        spotlightWindow.width = spotlightWindow.targetWidth;
+        spotlightWindow.height = spotlightWindow.targetHeight;
         spotlightWindow.show();
         spotlightWindow.requestActivate();
         focusTimer.restart();
@@ -340,12 +342,17 @@ PlasmoidItem {
         LayerShell.Window.scope: "nordic-launcher"
         LayerShell.Window.margins.top: Math.max(90, Math.round(Screen.height * 0.20))
 
-        width: popupRoot.implicitWidth + leftPadding + rightPadding
-        height: popupRoot.implicitHeight + topPadding + bottomPadding
-        minimumWidth: width
-        maximumWidth: width
-        minimumHeight: height
-        maximumHeight: height
+        readonly property int targetWidth: popupRoot.implicitWidth + leftPadding + rightPadding
+        readonly property int targetHeight: popupRoot.implicitHeight + topPadding + bottomPadding
+
+        width: targetWidth
+        height: targetHeight
+
+        onTargetHeightChanged: {
+            if (visible) {
+                height = targetHeight;
+            }
+        }
 
         onActiveChanged: {
             if (!active && visible) {
@@ -504,6 +511,7 @@ PlasmoidItem {
                 // 2. Minimal List Body (Just Icon + Name, up to 6 rows)
                 Item {
                     Layout.fillWidth: true
+                    Layout.preferredHeight: popupRoot.listHeight
                     Layout.fillHeight: true
 
                     ListView {
@@ -700,8 +708,8 @@ PlasmoidItem {
         }
     }
 
-    // Top-bar Arch Nordic launcher button
-    compactRepresentation: PlasmaCore.ToolTipArea {
+    // Top-bar Arch Nordic launcher button (rendered inline on the top panel)
+    fullRepresentation: PlasmaCore.ToolTipArea {
         id: compactRoot
         location: Plasmoid.location
         mainText: "Nordic Launcher"
