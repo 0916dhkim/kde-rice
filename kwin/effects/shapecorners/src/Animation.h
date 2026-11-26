@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QHash>
 #include <QPointer>
 #include <chrono>
 
@@ -37,14 +36,5 @@ namespace ShapeCorners
 
         QPointer<Window> currentActiveWindow;
         QPointer<Window> lastActiveWindow;
-
-        struct DiagState {
-            std::chrono::steady_clock::time_point lastFrame;
-            int frameCount = 0;
-            bool hasLastFrame = false;
-        };
-        std::chrono::steady_clock::time_point lastActivateSignalTime{};
-        bool hasActivateSignal = false;
-        QHash<const Window *, DiagState> diagByWindow;
     };
 } // namespace ShapeCorners

@@ -1,5 +1,4 @@
 #include "Animation.h"
-#include <QDebug>
 #include <effect/effecthandler.h>
 #include <effect/effectwindow.h>
 #include "Config.h"
@@ -13,16 +12,6 @@ ShapeCorners::Animation::Animation() = default;
 
 void ShapeCorners::Animation::onWindowActivated(KWin::EffectWindow *kwindow)
 {
-    lastActivateSignalTime = steady_clock::now();
-    hasActivateSignal = true;
-
-    if (Config::debugTimings()) {
-        const QString cap = kwindow ? kwindow->caption().left(40) : QStringLiteral("<null>");
-        qWarning().noquote() << QStringLiteral("[shapecorners-diag] windowActivated win=\"%1\" dur_cfg=%2ms")
-                                    .arg(cap)
-                                    .arg(Config::animationDuration());
-    }
-
     auto *const activeWindow = (WindowManager::instance() != nullptr)
         ? WindowManager::instance()->findWindow(kwindow)
         : nullptr;
@@ -56,32 +45,10 @@ void ShapeCorners::Animation::update(Window &window)
     const long elapsedMs         = duration_cast<milliseconds>(now - window.lastActiveChangedTime).count();
     const long remainingMs       = animationDuration - elapsedMs;
 
-    if (Config::debugTimings()) {
-        auto &diag = diagByWindow[&window];
-        const long gapMs = diag.hasLastFrame
-            ? duration_cast<milliseconds>(now - diag.lastFrame).count()
-            : -1;
-        const long sinceActMs = hasActivateSignal
-            ? duration_cast<milliseconds>(now - lastActivateSignalTime).count()
-            : -1;
-        diag.lastFrame = now;
-        diag.hasLastFrame = true;
-        diag.frameCount += 1;
-        const QString cap = window.w ? window.w->caption().left(32) : QStringLiteral("<null>");
-        qWarning().noquote() << QStringLiteral("[shapecorners-diag] frame win=\"%1\" active=%2 n=%3 since_act=%4ms gap=%5ms rem=%6ms")
-                                    .arg(cap)
-                                    .arg(window.isActive() ? 1 : 0)
-                                    .arg(diag.frameCount)
-                                    .arg(sinceActMs)
-                                    .arg(gapMs)
-                                    .arg(std::max<long>(0, remainingMs));
-    }
-
     if (animationDuration <= 0 || remainingMs <= 0) {
         window.lastAnimationDuration = 0;
         window.isAnimating           = false;
         window.currentConfig         = window.isActive() ? activeConfig : inactiveConfig;
-        diagByWindow.remove(&window);
         return;
     }
 
@@ -111,7 +78,6 @@ void ShapeCorners::Animation::startWindowAnimation(Window *window, const steady_
     if (window == nullptr || window->w == nullptr) {
         return;
     }
-    diagByWindow.remove(window);
     if (durationMs <= 0) {
         window->isAnimating           = false;
         window->lastAnimationDuration = 0;
@@ -131,20 +97,6 @@ void ShapeCorners::Animation::setActiveWindowChanged(Window *window)
 {
     const auto now        = steady_clock::now();
     const int  durationMs = Config::animationDuration();
-
-    if (Config::debugTimings()) {
-        const long delayMs = hasActivateSignal
-            ? duration_cast<milliseconds>(now - lastActivateSignalTime).count()
-            : -1;
-        const QString curCap  = (window && window->w) ? window->w->caption().left(32) : QStringLiteral("<null>");
-        const QString prevCap = (currentActiveWindow && currentActiveWindow->w)
-            ? currentActiveWindow->w->caption().left(32)
-            : QStringLiteral("<null>");
-        qWarning().noquote() << QStringLiteral("[shapecorners-diag] setActiveWindowChanged delay_since_act=%1ms new=\"%2\" prev=\"%3\"")
-                                    .arg(delayMs)
-                                    .arg(curCap)
-                                    .arg(prevCap);
-    }
 
     lastActiveWindow    = currentActiveWindow;
     currentActiveWindow = window;
