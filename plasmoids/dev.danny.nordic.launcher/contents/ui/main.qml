@@ -28,76 +28,14 @@ PlasmoidItem {
 
     readonly property var builtInActions: [
         {
-            id: "action:reload-plasma",
-            name: "Reload Plasma Shell",
-            icon: "system-software-update",
-            keywords: "restart refresh panel shell plasmashell reload",
-            kind: "command",
-            command: "systemctl --user restart plasma-plasmashell.service",
-            defaultRank: 6
-        },
-        {
-            id: "action:update-system",
-            name: "Update System Packages",
-            icon: "system-run",
-            keywords: "paru pacman upgrade arch update",
-            kind: "command",
-            command: "ghostty -e bash -lc 'paru -Syu; echo; read -n 1 -p \"Done. Press any key...\"'",
-            defaultRank: 4
-        },
-        {
-            id: "action:clear-icon-cache",
-            name: "Refresh Icon Cache",
-            icon: "preferences-desktop-theme-global",
-            keywords: "icons kcache reload theme cache",
-            kind: "command",
-            command: "rm -f \"$HOME/.cache/icon-cache.kcache\" && systemctl --user restart plasma-plasmashell.service",
-            defaultRank: 0
-        },
-        {
             id: "action:lock",
             name: "Lock Screen",
             icon: "system-lock-screen",
-            keywords: "lockscreen security sleep screen",
+            keywords: "lockscreen",
             kind: "session",
             actionId: "lock",
-            defaultRank: 5
-        },
-        {
-            id: "action:sleep",
-            name: "Sleep",
-            icon: "system-suspend",
-            keywords: "suspend standby snooze",
-            kind: "session",
-            actionId: "sleep",
-            defaultRank: 3
-        },
-        {
-            id: "action:restart",
-            name: "Restart",
-            icon: "system-reboot",
-            keywords: "reboot power cycle",
-            kind: "session",
-            actionId: "restart",
-            defaultRank: 0
-        },
-        {
-            id: "action:shutdown",
-            name: "Shut Down",
-            icon: "system-shutdown",
-            keywords: "poweroff halt turn off",
-            kind: "session",
-            actionId: "shutdown",
-            defaultRank: 0
-        },
-        {
-            id: "action:logout",
-            name: "Log Out",
-            icon: "system-log-out",
-            keywords: "sign out session exit",
-            kind: "session",
-            actionId: "logout",
-            defaultRank: 0
+            defaultRank: 5,
+            prefixBoost: 120
         }
     ]
 

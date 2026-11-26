@@ -389,13 +389,20 @@ test("launcher fuzzy/acronym/frecency matcher ranks and highlights accurately", 
     { id: "app:ghostty", name: "Ghostty", icon: "ghostty", keywords: "terminal", kind: "app", appRow: 0, defaultRank: 18 },
     { id: "app:settings", name: "System Settings", icon: "settings", keywords: "config", kind: "app", appRow: 1, defaultRank: 10 },
     { id: "app:obsidian", name: "Obsidian", icon: "obsidian", keywords: "notes", kind: "app", appRow: 2, defaultRank: 16 },
-    { id: "action:reload", name: "Reload Plasma Shell", icon: "reload", keywords: "restart panel", kind: "command", command: "true", defaultRank: 6 },
-    { id: "app:xss", name: "A & B <Test>", icon: "test", keywords: "", kind: "app", appRow: 3, defaultRank: 0 },
+    { id: "app:libreoffice", name: "LibreOffice", icon: "lo", keywords: "office", kind: "app", appRow: 3, defaultRank: 0 },
+    { id: "action:lock", name: "Lock Screen", icon: "system-lock-screen", keywords: "lockscreen", kind: "session", actionId: "lock", defaultRank: 5, prefixBoost: 120 },
+    { id: "app:xss", name: "A & B <Test>", icon: "test", keywords: "", kind: "app", appRow: 4, defaultRank: 0 },
   ];
 
   const acronym = sandbox.rankItems(items, "ss", {}, 8);
   assert.equal(acronym[0].id, "app:settings");
   assert.match(acronym[0].displayHtml, /#88c0d0/);
+
+  const lockFirst = sandbox.rankItems(items, "l", { "app:libreoffice": 10 }, 8);
+  assert.equal(lockFirst[0].id, "action:lock");
+
+  const sNotLock = sandbox.rankItems(items, "s", {}, 8);
+  assert.equal(sNotLock[0].id, "app:settings");
 
   const fuzzy = sandbox.rankItems(items, "gst", {}, 8);
   assert.equal(fuzzy[0].id, "app:ghostty");

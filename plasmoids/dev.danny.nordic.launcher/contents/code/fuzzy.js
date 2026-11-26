@@ -138,9 +138,11 @@ function rankItems(items, query, launchCounts, maxResults) {
         } else {
             const match = scoreCandidate(q, item.name, item.keywords, count);
             if (match !== null) {
+                const isPrefix = item.name.toLowerCase().startsWith(q.toLowerCase());
+                const boost = isPrefix ? Number(item.prefixBoost || 0) : 0;
                 scored.push({
                     item: item,
-                    score: match.score,
+                    score: match.score + boost,
                     indices: match.indices,
                 });
             }
