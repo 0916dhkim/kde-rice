@@ -530,7 +530,7 @@ PlasmoidItem {
                             }
                         }
 
-                        // ESC / match-count pill
+                        // ESC hint pill
                         Rectangle {
                             implicitWidth: Math.max(24, badgeText.implicitWidth + 12)
                             implicitHeight: 20
@@ -543,7 +543,7 @@ PlasmoidItem {
                             Text {
                                 id: badgeText
                                 anchors.centerIn: parent
-                                text: root.query.length > 0 ? String(root.rankedResults.length) : "ESC"
+                                text: "ESC"
                                 color: Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.56)
                                 font.family: "monospace"
                                 font.pixelSize: 10
