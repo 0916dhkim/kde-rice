@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <style id="current-color-scheme" type="text/css">
+      .ColorScheme-Text { color: #d8dee9; }
+      .ColorScheme-Highlight { color: #88c0d0; }
+      .ColorScheme-PositiveText { color: #a3be8c; }
+      .ColorScheme-NegativeText { color: #bf616a; }
+    </style>
+    <linearGradient id="dg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#222e40"/>
+      <stop offset="100%" stop-color="#141c28"/>
+    </linearGradient>
+  </defs>
+  <g class="ColorScheme-Text">
+    <path d="M11.5 9.5A4.5 4.5 0 0 1 16 5h24.5l12 12v37.5A4.5 4.5 0 0 1 48 59H16a4.5 4.5 0 0 1-4.5-4.5v-45z" fill="url(#dg)" stroke="#bad2ee" stroke-opacity="0.26" stroke-width="1.25"/>
+    <path d="M40.5 5v8.5a3.5 3.5 0 0 0 3.5 3.5h8.5L40.5 5z" fill="#bf616a" fill-opacity="0.28" stroke="#bad2ee" stroke-opacity="0.26" stroke-width="1.15" stroke-linejoin="round"/>
+    <rect x="18" y="27" width="28" height="11" rx="3" fill="#bf616a" fill-opacity="0.28" stroke="#bf616a" stroke-opacity="0.72" stroke-width="1.3"/>
+    <text x="32" y="35.2" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="700" fill="#eceff4" letter-spacing="0.9">PDF</text>
+    <path d="M19 44.5h26M19 49.8h17" stroke="#d8dee9" stroke-opacity="0.55" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

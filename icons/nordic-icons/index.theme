@@ -1,10 +1,10 @@
 [Icon Theme]
 Name=Nordic Icons
-Comment=Minimal thin-stroke Nordic tray, popup, System Settings, and Dolphin icon overlay inheriting Breeze Dark
+Comment=Minimal thin-stroke Nordic tray, popup, System Settings, Dolphin, and dark-glass 64px file icons inheriting Breeze Dark
 Inherits=breeze-dark
 DisplayDepth=32
 FollowsColorScheme=true
-Directories=status/22,actions/22,apps/22,devices/22,preferences/22,categories/22,places/22,applets/22
+Directories=status/22,actions/22,apps/22,devices/22,preferences/22,categories/22,places/22,places/64,mimetypes/64,applets/22
 
 [status/22]
 Size=22
@@ -51,8 +51,22 @@ Type=Scalable
 [places/22]
 Size=22
 MinSize=16
-MaxSize=64
+MaxSize=31
 Context=Places
+Type=Scalable
+
+[places/64]
+Size=64
+MinSize=32
+MaxSize=256
+Context=Places
+Type=Scalable
+
+[mimetypes/64]
+Size=64
+MinSize=32
+MaxSize=256
+Context=MimeTypes
 Type=Scalable
 
 [applets/22]

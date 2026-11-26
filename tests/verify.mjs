@@ -362,6 +362,8 @@ test("nordic-icons overlay theme has valid index.theme, SVGs, and zero broken sy
   }
   walk(iconRoot);
   assert.match(idx, /places\/22/);
+  assert.match(idx, /places\/64/);
+  assert.match(idx, /mimetypes\/64/);
   assert.match(idx, /categories\/22/);
   for (const required of [
     "apps/22/ktip.svg",
@@ -374,11 +376,15 @@ test("nordic-icons overlay theme has valid index.theme, SVGs, and zero broken sy
     "places/22/user-home.svg",
     "places/22/folder-documents.svg",
     "devices/22/drive-harddisk.svg",
+    "places/64/folder.svg",
+    "mimetypes/64/text-plain.svg",
+    "mimetypes/64/application-x-executable.svg",
+    "mimetypes/64/application-pdf.svg",
   ]) {
     assert.ok(existsSync(join(iconRoot, required)), `missing ${required}`);
   }
-  assert.ok(files >= 75, `expected >= 75 canonical SVGs, got ${files}`);
-  assert.ok(links >= 250, `expected >= 250 alias symlinks, got ${links}`);
+  assert.ok(files >= 90, `expected >= 90 canonical SVGs, got ${files}`);
+  assert.ok(links >= 350, `expected >= 350 alias symlinks, got ${links}`);
 });
 
 test("launcher fuzzy/acronym/frecency matcher ranks and highlights accurately", () => {

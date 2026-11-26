@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <style id="current-color-scheme" type="text/css">
+      .ColorScheme-Text { color: #d8dee9; }
+      .ColorScheme-Highlight { color: #88c0d0; }
+      .ColorScheme-PositiveText { color: #a3be8c; }
+      .ColorScheme-NegativeText { color: #bf616a; }
+    </style>
+    <linearGradient id="dg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#222e40"/>
+      <stop offset="100%" stop-color="#141c28"/>
+    </linearGradient>
+  </defs>
+  <g class="ColorScheme-Text">
+    <path d="M11.5 9.5A4.5 4.5 0 0 1 16 5h24.5l12 12v37.5A4.5 4.5 0 0 1 48 59H16a4.5 4.5 0 0 1-4.5-4.5v-45z" fill="url(#dg)" stroke="#bad2ee" stroke-opacity="0.26" stroke-width="1.25"/>
+    <path d="M40.5 5v8.5a3.5 3.5 0 0 0 3.5 3.5h8.5L40.5 5z" fill="#88c0d0" fill-opacity="0.24" stroke="#bad2ee" stroke-opacity="0.26" stroke-width="1.15" stroke-linejoin="round"/>
+    <path d="M19.5 43V28.5l6.2 7 6.2-7V43" fill="none" stroke="#d8dee9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M41 28.5v13.5m-3.8-3.8l3.8 3.8 3.8-3.8" fill="none" stroke="#88c0d0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
