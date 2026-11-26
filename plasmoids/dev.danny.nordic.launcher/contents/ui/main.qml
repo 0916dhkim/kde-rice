@@ -524,11 +524,7 @@ PlasmoidItem {
                                 }
 
                                 Keys.onEscapePressed: function(event) {
-                                    if (root.query.length > 0) {
-                                        root.query = "";
-                                    } else {
-                                        root.closeLauncher();
-                                    }
+                                    root.closeLauncher();
                                     event.accepted = true;
                                 }
                             }
