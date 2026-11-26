@@ -335,22 +335,30 @@ PlasmoidItem {
         }
     }
 
-    // Spotlight-style minimal popover: Mockup 1 440px frame with edge-to-edge dividers & full-bleed dark bottom bar
+    // Spotlight-style minimal popover: Mockup 1 440px frame with exact -9px bleed flush to the 1px dialog rim
     fullRepresentation: PlasmaExtras.Representation {
         id: popupRoot
 
         collapseMarginsHint: true
+        // nordic-glass dialogs/background.svg has 10px content margin + 1px border rim -> -9px bleeds flush inside rim
+        leftPadding: -9
+        rightPadding: -9
+        topPadding: -9
+        bottomPadding: -9
 
         readonly property int rowHeight: 38
         readonly property int visibleRows: Math.max(1, Math.min(6, root.rankedResults.length))
         readonly property int listHeight: visibleRows * rowHeight + (visibleRows - 1) * 2 + 16
+        readonly property int totalInnerHeight: 48 + listHeight + 34
 
-        implicitWidth: 440
-        implicitHeight: 48 + listHeight + 34
-        Layout.minimumWidth: 420
-        Layout.preferredWidth: 440
+        implicitWidth: 440 - 18
+        implicitHeight: totalInnerHeight - 18
+        Layout.minimumWidth: implicitWidth
+        Layout.preferredWidth: implicitWidth
+        Layout.maximumWidth: implicitWidth
         Layout.minimumHeight: implicitHeight
         Layout.preferredHeight: implicitHeight
+        Layout.maximumHeight: implicitHeight
 
         Connections {
             target: root
