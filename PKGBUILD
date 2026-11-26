@@ -71,18 +71,18 @@ package() {
     cp -a icons/nordic-icons "$pkgdir/usr/share/icons/"
 
     # Bundled Manrope static UI font cuts (SIL OFL 1.1; Regular/Medium/SemiBold/Bold)
-    install -Dm644 fonts/manrope/Manrope-*.ttf -t "$pkgdir/usr/share/fonts/nordic-manrope/"
-    install -Dm644 fonts/manrope/OFL.txt "$pkgdir/usr/share/licenses/$pkgname/OFL-Manrope.txt"
+    install -Dm644 vendor/manrope/Manrope-*.ttf -t "$pkgdir/usr/share/fonts/nordic-manrope/"
+    install -Dm644 vendor/manrope/OFL.txt "$pkgdir/usr/share/licenses/$pkgname/OFL-Manrope.txt"
 
     # KWin 6 titlebar-free KDecoration3 plugin (0px titlebar + 8px invisible edge resize grips) + system-wide XDG kwinrc/ksplashrc defaults
     DESTDIR="$pkgdir" cmake --install "$srcdir/build-nordic-borderless"
     install -Dm644 kwin/kwinrc "$pkgdir/etc/xdg/kwinrc"
     install -Dm644 kwin/ksplashrc "$pkgdir/etc/xdg/ksplashrc"
 
-    # DKMS-style vendored KDE-Rounded-Corners (shapecorners) source + PostTransaction rebuild hook on kwin updates
+    # DKMS-style forked KDE-Rounded-Corners (nordic-kwin-shapecorners) source + PostTransaction rebuild hook on kwin updates
     install -d "$pkgdir/usr/src/kde-rice-shapecorners"
-    cp -r kwin/effects/shapecorners/. "$pkgdir/usr/src/kde-rice-shapecorners/"
-    install -Dm644 kwin/effects/shapecorners/LICENSE \
+    cp -r vendor/nordic-kwin-shapecorners/. "$pkgdir/usr/src/kde-rice-shapecorners/"
+    install -Dm644 vendor/nordic-kwin-shapecorners/LICENSE \
         "$pkgdir/usr/share/licenses/$pkgname/GPL-3.0-KDE-Rounded-Corners.txt"
     install -Dm755 kwin/kde-rice-shapecorners-build.sh \
         "$pkgdir/usr/lib/kde-rice/rebuild-shapecorners.sh"

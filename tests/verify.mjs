@@ -434,7 +434,7 @@ test("launcher fuzzy/acronym/frecency matcher ranks and highlights accurately", 
 });
 
 test("bundled Manrope static fonts and SIL OFL 1.1 license are present", () => {
-  const fontDir = join(ROOT, "fonts/manrope");
+  const fontDir = join(ROOT, "vendor/manrope");
   for (const f of [
     "Manrope-Regular.ttf",
     "Manrope-Medium.ttf",
@@ -502,8 +502,8 @@ test("PKGBUILD and .SRCINFO are valid and consistent", () => {
   execFileSync("bash", ["-n", join(ROOT, "kde-rice.install")], { stdio: "pipe" });
   execFileSync("bash", ["-n", join(ROOT, "kwin/kde-rice-shapecorners-build.sh")], { stdio: "pipe" });
 
-  assert.ok(existsSync(join(ROOT, "kwin/effects/shapecorners/CMakeLists.txt")));
-  assert.ok(existsSync(join(ROOT, "kwin/effects/shapecorners/LICENSE")));
+  assert.ok(existsSync(join(ROOT, "vendor/nordic-kwin-shapecorners/CMakeLists.txt")));
+  assert.ok(existsSync(join(ROOT, "vendor/nordic-kwin-shapecorners/LICENSE")));
   const hook = readFileSync(join(ROOT, "kwin/hooks/90-kde-rice-shapecorners-rebuild.hook"), "utf8");
   assert.match(hook, /^Target = kwin$/m);
   assert.match(hook, /^Target = kde-rice-git$/m);
