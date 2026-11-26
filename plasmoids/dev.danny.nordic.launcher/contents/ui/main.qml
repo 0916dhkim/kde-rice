@@ -341,10 +341,10 @@ PlasmoidItem {
         readonly property int rowHeight: 38
         readonly property int visibleRows: Math.max(1, Math.min(8, root.rankedResults.length))
 
-        implicitWidth: 420
-        implicitHeight: 48 + (visibleRows * rowHeight + (visibleRows - 1) * 2 + 16) + 34
-        Layout.minimumWidth: 380
-        Layout.preferredWidth: 420
+        implicitWidth: 400
+        implicitHeight: 38 + (visibleRows * rowHeight + (visibleRows - 1) * 2 + 12) + 32
+        Layout.minimumWidth: 360
+        Layout.preferredWidth: 400
         Layout.minimumHeight: implicitHeight
         Layout.preferredHeight: implicitHeight
 
@@ -371,15 +371,16 @@ PlasmoidItem {
             anchors.fill: parent
             spacing: 0
 
-            // 1. Mockup 1 Search Bar (48px)
+            // 1. Search Bar (38px inner + 10px dialog SVG top margin = 48px total, flush with list)
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 48
+                Layout.preferredHeight: 38
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 14
-                    anchors.rightMargin: 12
+                    anchors.leftMargin: 6
+                    anchors.rightMargin: 6
+                    anchors.bottomMargin: 4
                     spacing: 10
 
                     Kirigami.Icon {
@@ -507,7 +508,8 @@ PlasmoidItem {
                 ListView {
                     id: resultsList
                     anchors.fill: parent
-                    anchors.margins: 8
+                    anchors.topMargin: 6
+                    anchors.bottomMargin: 6
                     spacing: 2
                     clip: true
                     interactive: contentHeight > height
@@ -615,24 +617,24 @@ PlasmoidItem {
                 }
             }
 
-            // 3. Mockup 1 Bottom Bar (34px) — Keyboard Hints + Power Actions
-            Rectangle {
+            // 3. Seamless Bottom Bar (32px inner, transparent over dialog glass + subtle top hairline)
+            Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 34
-                color: Qt.rgba(12 / 255, 16 / 255, 24 / 255, 0.45)
+                Layout.preferredHeight: 32
 
                 Rectangle {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
                     height: 1
-                    color: Qt.rgba(186 / 255, 210 / 255, 238 / 255, 0.09)
+                    color: Qt.rgba(186 / 255, 210 / 255, 238 / 255, 0.10)
                 }
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 10
+                    anchors.topMargin: 6
+                    anchors.leftMargin: 4
+                    anchors.rightMargin: 2
                     spacing: 10
 
                     RowLayout {
