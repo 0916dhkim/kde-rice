@@ -94,7 +94,7 @@ test("Global Theme (look-and-feel) and Wallpaper KPackages are valid", () => {
 
   const wallMeta = JSON.parse(readFileSync(join(ROOT, "wallpapers/NordicMist/metadata.json"), "utf8"));
   assert.equal(wallMeta.KPlugin?.Id, "NordicMist");
-  assert.ok(existsSync(join(ROOT, "wallpapers/NordicMist/contents/images/3000x2000.png")));
+  assert.ok(existsSync(join(ROOT, "wallpapers/NordicMist/contents/images/3840x2160.png")));
 });
 
 test("panel-background and dialog SVGs contain required 9-slice, mask, shadow, and floating IDs", () => {
