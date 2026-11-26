@@ -326,6 +326,7 @@ test("KWin 6 nordic-notitlebar script and /etc/xdg/kwinrc rounded-corner default
   assert.match(kwinrc, /^nordic-notitlebarEnabled=true$/m);
   assert.match(kwinrc, /^\[TabBox\]/m);
   assert.match(kwinrc, /^ApplicationsMode=1$/m);
+  assert.match(kwinrc, /^DelayTime=0$/m);
   assert.match(kwinrc, /^HighlightWindows=false$/m);
   assert.match(kwinrc, /^LayoutName=dev\.danny\.nordic$/m);
   assert.match(kwinrc, /^\[Round-Corners\]/m);

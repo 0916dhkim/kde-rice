@@ -27,4 +27,5 @@ theme=Breeze
 [kwinrc][TabBox]
 LayoutName=dev.danny.nordic
 ApplicationsMode=1
+DelayTime=0
 HighlightWindows=false
