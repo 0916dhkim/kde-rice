@@ -23,3 +23,8 @@ Image=NordicMist
 [kwinrc][org.kde.kdecoration2]
 library=org.kde.breeze
 theme=Breeze
+
+[kwinrc][TabBox]
+LayoutName=dev.danny.nordic
+ApplicationsMode=1
+HighlightWindows=false

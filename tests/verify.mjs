@@ -324,6 +324,10 @@ test("KWin 6 nordic-notitlebar script and /etc/xdg/kwinrc rounded-corner default
   assert.match(kwinrc, /^\[Plugins\]/m);
   assert.match(kwinrc, /^kwin4_effect_shapecornersEnabled=true$/m);
   assert.match(kwinrc, /^nordic-notitlebarEnabled=true$/m);
+  assert.match(kwinrc, /^\[TabBox\]/m);
+  assert.match(kwinrc, /^ApplicationsMode=1$/m);
+  assert.match(kwinrc, /^HighlightWindows=false$/m);
+  assert.match(kwinrc, /^LayoutName=dev\.danny\.nordic$/m);
   assert.match(kwinrc, /^\[Round-Corners\]/m);
   assert.match(kwinrc, /^AnimationDuration=200$/m);
   assert.match(kwinrc, /^Size=12$/m);
@@ -332,6 +336,16 @@ test("KWin 6 nordic-notitlebar script and /etc/xdg/kwinrc rounded-corner default
   assert.match(kwinrc, /^InactiveOutlineColor=136,192,208$/m);
   assert.match(kwinrc, /^InactiveOutlineAlpha=108$/m);
   assert.match(kwinrc, /^UseNativeDecorationShadows=false$/m);
+
+  const switcherQml = readFileSync(
+    join(ROOT, "look-and-feel/dev.danny.nordic/contents/windowswitcher/WindowSwitcher.qml"),
+    "utf8"
+  );
+  assert.match(switcherQml, /KWin\.TabBoxSwitcher/);
+  assert.match(switcherQml, /KWin\.WindowThumbnail/);
+  assert.match(switcherQml, /KWin\.Workspace\.windows/);
+  assert.match(switcherQml, /sameAppMode/);
+  assert.ok(!/font\.pixelSize\s*:\s*\d+\.\d+/.test(switcherQml), "WindowSwitcher.qml must use integer font.pixelSize");
 });
 
 test("nordic-icons overlay theme has valid index.theme, SVGs, and zero broken symlinks", () => {

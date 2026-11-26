@@ -2,6 +2,11 @@
 kwin4_effect_shapecornersEnabled=true
 nordic-notitlebarEnabled=true
 
+[TabBox]
+ApplicationsMode=1
+HighlightWindows=false
+LayoutName=dev.danny.nordic
+
 [Round-Corners]
 ActiveOutlineAlpha=235
 ActiveOutlineUseCustom=true
