@@ -50,10 +50,10 @@
         topBar.opacity = "translucent";
     }
 
-    const launcher = topBar.addWidget("org.kde.plasma.kickoff");
+    const launcher = topBar.addWidget("dev.danny.nordic.launcher");
     launcher.currentConfigGroup = ["General"];
     launcher.writeConfig("icon", LAUNCHER_ICON);
-    launcher.writeConfig("favoritesPortedToKAstats", true);
+    launcher.globalShortcut = "Alt+F1";
 
     topBar.addWidget("dev.danny.nordic.workspaces");
     topBar.addWidget("dev.danny.nordic.windowtitle");

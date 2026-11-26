@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.w3.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+  <kcfgfile name=""/>
+  <group name="General">
+    <entry name="icon" type="String">
+      <default>start-here-kde-symbolic</default>
+    </entry>
+    <entry name="launchCounts" type="String">
+      <default>{}</default>
+    </entry>
+    <entry name="customActions" type="String">
+      <default>[]</default>
+    </entry>
+  </group>
+</kcfg>

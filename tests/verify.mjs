@@ -30,9 +30,10 @@ const EXPECTED_PLASMOIDS = [
   "dev.danny.nordic.clock",
   "dev.danny.nordic.sysstat",
   "dev.danny.nordic.dock",
+  "dev.danny.nordic.launcher",
 ];
 
-test("all 5 Plasma 6 plasmoids have valid metadata.json and QML entrypoint", () => {
+test("all 6 Plasma 6 plasmoids have valid metadata.json and QML entrypoint", () => {
   for (const id of EXPECTED_PLASMOIDS) {
     const dir = join(ROOT, "plasmoids", id);
     const metaPath = join(dir, "metadata.json");
@@ -249,7 +250,7 @@ test("Global Theme desktop-layout.js builds top floating bar + bottom autohide f
   assert.deepEqual(
     topBar._widgets.map((w) => w.type),
     [
-      "org.kde.plasma.kickoff",
+      "dev.danny.nordic.launcher",
       "dev.danny.nordic.workspaces",
       "dev.danny.nordic.windowtitle",
       "org.kde.plasma.panelspacer",
@@ -259,6 +260,7 @@ test("Global Theme desktop-layout.js builds top floating bar + bottom autohide f
       "org.kde.plasma.systemtray",
     ]
   );
+  assert.equal(topBar._widgets[0].globalShortcut, "Alt+F1");
   assert.equal(
     topBar._widgets[0]._cfg["General:icon"],
     "/usr/share/plasma/desktoptheme/nordic-glass/icons/nordic-launcher.svg"
@@ -373,6 +375,38 @@ test("nordic-icons overlay theme has valid index.theme, SVGs, and zero broken sy
   }
   assert.ok(files >= 75, `expected >= 75 canonical SVGs, got ${files}`);
   assert.ok(links >= 250, `expected >= 250 alias symlinks, got ${links}`);
+});
+
+test("launcher fuzzy/acronym/frecency matcher ranks and highlights accurately", () => {
+  const src = readFileSync(
+    join(ROOT, "plasmoids/dev.danny.nordic.launcher/contents/code/fuzzy.js"),
+    "utf8"
+  ).replace(/^\.pragma library\s*/m, "");
+  const sandbox = {};
+  vm.runInNewContext(src, sandbox);
+
+  const items = [
+    { id: "app:ghostty", name: "Ghostty", icon: "ghostty", keywords: "terminal", kind: "app", appRow: 0, defaultRank: 18 },
+    { id: "app:settings", name: "System Settings", icon: "settings", keywords: "config", kind: "app", appRow: 1, defaultRank: 10 },
+    { id: "app:obsidian", name: "Obsidian", icon: "obsidian", keywords: "notes", kind: "app", appRow: 2, defaultRank: 16 },
+    { id: "action:reload", name: "Reload Plasma Shell", icon: "reload", keywords: "restart panel", kind: "command", command: "true", defaultRank: 6 },
+    { id: "app:xss", name: "A & B <Test>", icon: "test", keywords: "", kind: "app", appRow: 3, defaultRank: 0 },
+  ];
+
+  const acronym = sandbox.rankItems(items, "ss", {}, 8);
+  assert.equal(acronym[0].id, "app:settings");
+  assert.match(acronym[0].displayHtml, /#88c0d0/);
+
+  const fuzzy = sandbox.rankItems(items, "gst", {}, 8);
+  assert.equal(fuzzy[0].id, "app:ghostty");
+
+  const emptyFrecency = sandbox.rankItems(items, "", { "app:obsidian": 5 }, 8);
+  assert.equal(emptyFrecency[0].id, "app:obsidian");
+
+  const escaped = sandbox.rankItems(items, "test", {}, 8);
+  assert.equal(escaped[0].id, "app:xss");
+  assert.ok(!escaped[0].displayHtml.includes("<Test>"), "must HTML-escape app names");
+  assert.match(escaped[0].displayHtml, /&amp;.*&lt;/);
 });
 
 test("bundled Manrope static fonts and SIL OFL 1.1 license are present", () => {
