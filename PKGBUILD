@@ -55,10 +55,17 @@ package() {
     install -Dm644 fonts/manrope/Manrope-*.ttf -t "$pkgdir/usr/share/fonts/nordic-manrope/"
     install -Dm644 fonts/manrope/OFL.txt "$pkgdir/usr/share/licenses/$pkgname/OFL-Manrope.txt"
 
-    # KWin 6 borderless windows script + system-wide XDG kwinrc defaults (rounded corners + outlines + shadows)
+    # KWin 6 borderless windows script + system-wide XDG kwinrc defaults (rounded corners + outlines + shadows + switcher)
     install -d "$pkgdir/usr/share/kwin/scripts"
     cp -r kwin/scripts/nordic-notitlebar "$pkgdir/usr/share/kwin/scripts/"
     install -Dm644 kwin/kwinrc "$pkgdir/etc/xdg/kwinrc"
+
+    # Plasma 6 Editorial Nordic Minimal lock screen (Plasma/Shell package + KWin-only systemd user drop-in + default wallpaper)
+    install -d "$pkgdir/usr/share/plasma/shells"
+    cp -r kscreenlocker/shells/dev.danny.nordic.lockscreen "$pkgdir/usr/share/plasma/shells/"
+    install -Dm644 kscreenlocker/nordic-lockscreen.conf \
+        "$pkgdir/usr/lib/systemd/user/plasma-kwin_wayland.service.d/nordic-lockscreen.conf"
+    install -Dm644 kscreenlocker/kscreenlockerrc "$pkgdir/etc/xdg/kscreenlockerrc"
 
     # Normalize permissions cleanly for system installation (preserve symlinks)
     find "$pkgdir/usr/share" -type d -exec chmod 755 {} +

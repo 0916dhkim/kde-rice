@@ -1,0 +1,18 @@
+{
+    "KPackageStructure": "Plasma/Shell",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Danny Kim"
+            }
+        ],
+        "Category": "Plasma Shell",
+        "Description": "Editorial Nordic Minimal lock screen for Plasma 6",
+        "Id": "dev.danny.nordic.lockscreen",
+        "License": "MIT",
+        "Name": "Nordic Minimal Lock Screen",
+        "Version": "1.0"
+    },
+    "X-KDE-ParentApp": "org.kde.plasmashell",
+    "X-Plasma-APIVersion": "2"
+}

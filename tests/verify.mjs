@@ -466,6 +466,28 @@ test("bundled Manrope static fonts and SIL OFL 1.1 license are present", () => {
   assert.match(ofl, /SIL OPEN FONT LICENSE Version 1\.1/);
 });
 
+test("Editorial Nordic Minimal lock screen shell package and KWin drop-in are valid", () => {
+  const shellDir = join(ROOT, "kscreenlocker/shells/dev.danny.nordic.lockscreen");
+  const meta = JSON.parse(readFileSync(join(shellDir, "metadata.json"), "utf8"));
+  assert.equal(meta.KPackageStructure, "Plasma/Shell");
+  assert.equal(meta.KPlugin?.Id, "dev.danny.nordic.lockscreen");
+  assert.equal(meta["X-Plasma-APIVersion"], "2");
+
+  const lockQml = readFileSync(join(shellDir, "contents/lockscreen/LockScreen.qml"), "utf8");
+  assert.match(lockQml, /property bool viewVisible/);
+  assert.match(lockQml, /property bool locked/);
+  assert.match(lockQml, /authenticator\.startAuthenticating\(\)/);
+  assert.match(lockQml, /authenticator\.respond\(/);
+  assert.match(lockQml, /sessionManagement\.suspend\(\)/);
+  assert.ok(!/font\.pixelSize\s*:\s*\d+\.\d+/.test(lockQml), "LockScreen.qml must use integer font.pixelSize");
+
+  const dropIn = readFileSync(join(ROOT, "kscreenlocker/nordic-lockscreen.conf"), "utf8");
+  assert.match(dropIn, /^Environment=PLASMA_DEFAULT_SHELL=dev\.danny\.nordic\.lockscreen$/m);
+
+  const lockrc = readFileSync(join(ROOT, "kscreenlocker/kscreenlockerrc"), "utf8");
+  assert.match(lockrc, /NordicMist/);
+});
+
 test("PKGBUILD and .SRCINFO are valid and consistent", () => {
   const pkgbuild = readFileSync(join(ROOT, "PKGBUILD"), "utf8");
   const srcinfo = readFileSync(join(ROOT, ".SRCINFO"), "utf8");
