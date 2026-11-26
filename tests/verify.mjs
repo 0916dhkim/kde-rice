@@ -492,15 +492,29 @@ test("PKGBUILD and .SRCINFO are valid and consistent", () => {
   const pkgbuild = readFileSync(join(ROOT, "PKGBUILD"), "utf8");
   const srcinfo = readFileSync(join(ROOT, ".SRCINFO"), "utf8");
   execFileSync("bash", ["-n", join(ROOT, "PKGBUILD")], { stdio: "pipe" });
+  execFileSync("bash", ["-n", join(ROOT, "kde-rice.install")], { stdio: "pipe" });
+  execFileSync("bash", ["-n", join(ROOT, "kwin/kde-rice-shapecorners-build.sh")], { stdio: "pipe" });
+
+  assert.ok(existsSync(join(ROOT, "kwin/effects/shapecorners/CMakeLists.txt")));
+  assert.ok(existsSync(join(ROOT, "kwin/effects/shapecorners/LICENSE")));
+  const hook = readFileSync(join(ROOT, "kwin/hooks/90-kde-rice-shapecorners-rebuild.hook"), "utf8");
+  assert.match(hook, /^Target = kwin$/m);
+  assert.match(hook, /^Target = kde-rice-git$/m);
+  assert.match(hook, /^When = PostTransaction$/m);
+  assert.match(hook, /^Exec = \/usr\/lib\/kde-rice\/rebuild-shapecorners\.sh$/m);
 
   assert.match(pkgbuild, /^pkgname=kde-rice-git$/m);
   assert.match(pkgbuild, /OFL-1\.1/);
+  assert.match(pkgbuild, /GPL-3\.0-or-later/);
+  assert.match(pkgbuild, /^install=kde-rice\.install$/m);
   assert.match(pkgbuild, /'kwin-effect-rounded-corners-git'/);
   assert.match(pkgbuild, /git\+https:\/\/github\.com\/0916dhkim\/kde-rice\.git/);
   assert.match(srcinfo, /^pkgbase = kde-rice-git$/m);
   assert.match(srcinfo, /^pkgname = kde-rice-git$/m);
   assert.match(srcinfo, /\tlicense = OFL-1\.1$/m);
-  assert.match(srcinfo, /\tdepends = kwin-effect-rounded-corners-git$/m);
+  assert.match(srcinfo, /\tlicense = GPL-3\.0-or-later$/m);
+  assert.match(srcinfo, /\tinstall = kde-rice\.install$/m);
+  assert.match(srcinfo, /\tconflicts = kwin-effect-rounded-corners-git$/m);
   assert.match(srcinfo, /source = kde-rice::git\+https:\/\/github\.com\/0916dhkim\/kde-rice\.git/);
 });
 

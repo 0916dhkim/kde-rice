@@ -1,0 +1,11 @@
+post_remove() {
+    local manifest="/var/lib/kde-rice/shapecorners.manifest"
+    if [ -f "$manifest" ]; then
+        while IFS= read -r installed_file; do
+            [ -n "$installed_file" ] || continue
+            rm -f "$installed_file"
+        done < "$manifest"
+        rm -f "$manifest"
+    fi
+    rmdir --ignore-fail-on-non-empty /var/lib/kde-rice 2>/dev/null || true
+}

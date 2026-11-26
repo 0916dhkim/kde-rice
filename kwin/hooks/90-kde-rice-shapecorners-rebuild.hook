@@ -1,0 +1,15 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = kwin
+Target = kde-rice-git
+
+[Action]
+Description = Rebuilding Nordic KWin rounded-corners effect against installed KWin...
+When = PostTransaction
+Exec = /usr/lib/kde-rice/rebuild-shapecorners.sh
+Depends = cmake
+Depends = extra-cmake-modules
+Depends = ninja
+Depends = gcc

@@ -2,20 +2,32 @@
 pkgname=kde-rice-git
 pkgver=0.1.0.r1.g0b94525
 pkgrel=1
-pkgdesc="Nordic Minimal Plasma 6 Global Theme, plasmoids, frosted glass style, and autohide dock layout"
+pkgdesc="Nordic Minimal Plasma 6 Global Theme, plasmoids, frosted glass style, adaptive switcher, lock screen, and auto-rebuilt KWin rounded-corners effect"
 arch=('any')
 url="https://github.com/0916dhkim/kde-rice"
-license=('MIT' 'OFL-1.1')
+license=('MIT' 'OFL-1.1' 'GPL-3.0-or-later')
 depends=(
     'plasma-workspace'
     'plasma-desktop'
     'plasma-pa'
     'libksysguard'
-    'kwin-effect-rounded-corners-git'
+    'kwin'
+    'cmake'
+    'extra-cmake-modules'
+    'ninja'
+    'gcc'
+    'pkgconf'
+    'gettext'
+    'vulkan-headers'
+    'libepoxy'
+    'kconfigwidgets'
+    'ki18n'
+    'kcmutils'
 )
 makedepends=('git')
-provides=('kde-rice')
-conflicts=('kde-rice')
+provides=('kde-rice' 'kwin-effect-rounded-corners')
+conflicts=('kde-rice' 'kwin-effect-rounded-corners' 'kwin-effect-rounded-corners-git')
+install=kde-rice.install
 source=("kde-rice::git+https://github.com/0916dhkim/kde-rice.git")
 sha256sums=('SKIP')
 
@@ -35,7 +47,7 @@ package() {
     install -d "$pkgdir/usr/share/plasma/desktoptheme"
     cp -r themes/nordic-glass "$pkgdir/usr/share/plasma/desktoptheme/"
 
-    # Nordic Minimal Global Theme (Look and Feel)
+    # Nordic Minimal Global Theme (Look and Feel + adaptive WindowSwitcher)
     install -d "$pkgdir/usr/share/plasma/look-and-feel"
     cp -r look-and-feel/dev.danny.nordic "$pkgdir/usr/share/plasma/look-and-feel/"
 
@@ -60,6 +72,16 @@ package() {
     cp -r kwin/scripts/nordic-notitlebar "$pkgdir/usr/share/kwin/scripts/"
     install -Dm644 kwin/kwinrc "$pkgdir/etc/xdg/kwinrc"
 
+    # DKMS-style vendored KDE-Rounded-Corners (shapecorners) source + PostTransaction rebuild hook on kwin updates
+    install -d "$pkgdir/usr/src/kde-rice-shapecorners"
+    cp -r kwin/effects/shapecorners/. "$pkgdir/usr/src/kde-rice-shapecorners/"
+    install -Dm644 kwin/effects/shapecorners/LICENSE \
+        "$pkgdir/usr/share/licenses/$pkgname/GPL-3.0-KDE-Rounded-Corners.txt"
+    install -Dm755 kwin/kde-rice-shapecorners-build.sh \
+        "$pkgdir/usr/lib/kde-rice/rebuild-shapecorners.sh"
+    install -Dm644 kwin/hooks/90-kde-rice-shapecorners-rebuild.hook \
+        "$pkgdir/usr/share/libalpm/hooks/90-kde-rice-shapecorners-rebuild.hook"
+
     # Plasma 6 Editorial Nordic Minimal lock screen (Plasma/Shell package + KWin-only systemd user drop-in + default wallpaper)
     install -d "$pkgdir/usr/share/plasma/shells"
     cp -r kscreenlocker/shells/dev.danny.nordic.lockscreen "$pkgdir/usr/share/plasma/shells/"
@@ -70,4 +92,6 @@ package() {
     # Normalize permissions cleanly for system installation (preserve symlinks)
     find "$pkgdir/usr/share" -type d -exec chmod 755 {} +
     find "$pkgdir/usr/share" -type f ! -type l -exec chmod 644 {} +
+    find "$pkgdir/usr/src/kde-rice-shapecorners" -type d -exec chmod 755 {} +
+    find "$pkgdir/usr/src/kde-rice-shapecorners" -type f -exec chmod 644 {} +
 }
