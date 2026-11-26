@@ -355,8 +355,24 @@ test("nordic-icons overlay theme has valid index.theme, SVGs, and zero broken sy
     }
   }
   walk(iconRoot);
-  assert.ok(files >= 30, `expected >= 30 canonical SVGs, got ${files}`);
-  assert.ok(links >= 100, `expected >= 100 alias symlinks, got ${links}`);
+  assert.match(idx, /places\/22/);
+  assert.match(idx, /categories\/22/);
+  for (const required of [
+    "apps/22/ktip.svg",
+    "apps/22/kup.svg",
+    "apps/22/lighttable.svg",
+    "apps/22/kwalletmanager.svg",
+    "preferences/22/preferences-desktop-theme-global.svg",
+    "preferences/22/preferences-desktop-wallpaper.svg",
+    "preferences/22/preferences-desktop-user-password.svg",
+    "places/22/user-home.svg",
+    "places/22/folder-documents.svg",
+    "devices/22/drive-harddisk.svg",
+  ]) {
+    assert.ok(existsSync(join(iconRoot, required)), `missing ${required}`);
+  }
+  assert.ok(files >= 75, `expected >= 75 canonical SVGs, got ${files}`);
+  assert.ok(links >= 250, `expected >= 250 alias symlinks, got ${links}`);
 });
 
 test("bundled Manrope static fonts and SIL OFL 1.1 license are present", () => {
