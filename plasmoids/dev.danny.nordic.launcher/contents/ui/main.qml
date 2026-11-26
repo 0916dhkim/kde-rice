@@ -21,6 +21,7 @@ PlasmoidItem {
 
     property string query: ""
     property int selectedIndex: 0
+    property var allAppsModel: null
     property var appCatalog: []
     property var rankedResults: []
     property var launchCounts: ({})
@@ -100,19 +101,45 @@ PlasmoidItem {
         }
     ]
 
-    Kicker.AppsModel {
-        id: appsModel
-        flat: true
+    // RootModel populates KICKER_ALL_MODEL (flat list of all installed .desktop apps)
+    Kicker.RootModel {
+        id: rootModel
+        autoPopulate: false
+        flat: false
         sorted: true
-        autoPopulate: true
+        showAllApps: true
+        showAllAppsCategorized: false
+        showRecentApps: false
+        showRecentDocs: false
+        showRecentFolders: false
+        showPowerSession: false
         showSeparators: false
         appletInterface: root
+
+        onRefreshed: root.attachAllAppsModel()
+        onCountChanged: root.attachAllAppsModel()
+        onModelReset: root.attachAllAppsModel()
     }
 
-    // Mirrors AppsModel rows via named roles (no magic role integers) and auto-refreshes on app install/remove
+    function attachAllAppsModel(): void {
+        let found = null;
+        for (let i = 0; i < rootModel.count; ++i) {
+            const sub = rootModel.modelForRow(i);
+            if (sub && sub.description === "KICKER_ALL_MODEL") {
+                found = sub;
+                break;
+            }
+        }
+        if (found !== root.allAppsModel) {
+            root.allAppsModel = found;
+        }
+        catalogTimer.restart();
+    }
+
+    // Mirrors KICKER_ALL_MODEL rows via named roles and auto-refreshes when apps are installed/removed
     Instantiator {
         id: appCollector
-        model: appsModel
+        model: root.allAppsModel
         delegate: QtObject {
             required property int index
             required property var model
@@ -288,8 +315,8 @@ PlasmoidItem {
         recordLaunch(entry.id);
         root.expanded = false;
 
-        if (entry.kind === "app" && entry.appRow >= 0) {
-            appsModel.trigger(entry.appRow, "", null);
+        if (entry.kind === "app" && entry.appRow >= 0 && root.allAppsModel) {
+            root.allAppsModel.trigger(entry.appRow, "", null);
         } else if (entry.kind === "session") {
             runSessionAction(entry.actionId);
         } else if (entry.kind === "command" && entry.command) {
@@ -312,7 +339,8 @@ PlasmoidItem {
 
     Component.onCompleted: {
         loadLaunchCounts();
-        catalogTimer.restart();
+        rootModel.refresh();
+        attachAllAppsModel();
     }
 
     // Top-bar Arch Nordic launcher button
