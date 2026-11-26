@@ -349,27 +349,16 @@ PlasmoidItem {
                         }
                     }
 
-                    PlasmaCore.ToolTipArea {
+                    Item {
                         id: taskTile
-                        location: Plasmoid.location
-                        mainText: slotWrap.appName
-                        subText: {
-                            if (slotWrap.isLauncher) {
-                                return "Launch " + slotWrap.appName;
-                            }
-                            if (slotWrap.isGroupParent && slotWrap.childCount > 1) {
-                                return slotWrap.childCount + " open windows";
-                            }
-                            if (slotWrap.winTitle && slotWrap.winTitle !== slotWrap.appName) {
-                                return slotWrap.winTitle;
-                            }
-                            return "";
-                        }
-
                         implicitWidth: root.squircleSize
                         implicitHeight: root.innerHeight
                         Layout.alignment: Qt.AlignVCenter
                         opacity: slotWrap.isDraggingThis ? 0.55 : 1.0
+
+                        HoverHandler {
+                            id: tileHover
+                        }
 
                         Behavior on opacity {
                             NumberAnimation { duration: 100 }
@@ -386,7 +375,7 @@ PlasmoidItem {
                                 if (slotWrap.isActive) {
                                     return Qt.rgba(52 / 255, 68 / 255, 88 / 255, 0.74);
                                 }
-                                if (taskTile.containsMouse) {
+                                if (tileHover.hovered) {
                                     return Qt.rgba(54 / 255, 66 / 255, 84 / 255, 0.65);
                                 }
                                 return Qt.rgba(38 / 255, 47 / 255, 62 / 255, 0.54);
@@ -396,7 +385,7 @@ PlasmoidItem {
                                 if (slotWrap.isActive) {
                                     return Qt.rgba(136 / 255, 192 / 255, 208 / 255, 0.54);
                                 }
-                                if (taskTile.containsMouse) {
+                                if (tileHover.hovered) {
                                     return Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.22);
                                 }
                                 return Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.11);
@@ -415,7 +404,7 @@ PlasmoidItem {
                                 width: 24
                                 height: 24
                                 source: slotWrap.model.decoration
-                                scale: slotWrap.isPressedThis ? 0.92 : (taskTile.containsMouse ? 1.08 : 1.0)
+                                scale: slotWrap.isPressedThis ? 0.92 : (tileHover.hovered ? 1.08 : 1.0)
 
                                 Behavior on scale {
                                     NumberAnimation {
