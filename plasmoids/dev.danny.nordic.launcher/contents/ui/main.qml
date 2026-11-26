@@ -657,8 +657,10 @@ PlasmoidItem {
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 14
-                    anchors.rightMargin: 10
-                    spacing: 10
+                    anchors.rightMargin: 14
+                    spacing: 12
+
+                    Item { Layout.fillWidth: true }
 
                     RowLayout {
                         spacing: 5
@@ -703,51 +705,6 @@ PlasmoidItem {
                             text: "Open"
                             color: Qt.rgba(216 / 255, 222 / 255, 233 / 255, 0.48)
                             font.pixelSize: 11
-                        }
-                    }
-
-                    Item { Layout.fillWidth: true }
-
-                    Repeater {
-                        model: [
-                            { id: "lock", icon: "system-lock-screen", label: "Lock Screen" },
-                            { id: "sleep", icon: "system-suspend", label: "Sleep" },
-                            { id: "restart", icon: "system-reboot", label: "Restart" },
-                            { id: "shutdown", icon: "system-shutdown", label: "Shut Down" }
-                        ]
-
-                        delegate: PlasmaCore.ToolTipArea {
-                            id: pwrBtn
-                            required property var modelData
-                            location: PlasmaCore.Types.BottomEdge
-                            mainText: pwrBtn.modelData.label
-
-                            implicitWidth: 24
-                            implicitHeight: 24
-                            Layout.alignment: Qt.AlignVCenter
-
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: 6
-                                color: pwrMouse.containsMouse
-                                    ? Qt.rgba(136 / 255, 192 / 255, 208 / 255, 0.16)
-                                    : "transparent"
-
-                                Kirigami.Icon {
-                                    anchors.centerIn: parent
-                                    width: 14
-                                    height: 14
-                                    source: pwrBtn.modelData.icon
-                                }
-                            }
-
-                            MouseArea {
-                                id: pwrMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.runSessionAction(pwrBtn.modelData.id)
-                            }
                         }
                     }
                 }
