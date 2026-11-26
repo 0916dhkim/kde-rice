@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import QtQml.Models
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
+import org.kde.plasma.extras as PlasmaExtras
 import org.kde.plasma.plasma5support as Plasma5Support
 import org.kde.plasma.private.kicker as Kicker
 import org.kde.plasma.private.sessions as Sessions
@@ -222,7 +223,7 @@ PlasmoidItem {
     }
 
     function refreshResults(): void {
-        rankedResults = Fuzzy.rankItems(appCatalog, query, launchCounts, 8);
+        rankedResults = Fuzzy.rankItems(appCatalog, query, launchCounts, 6);
         if (selectedIndex >= rankedResults.length) {
             selectedIndex = Math.max(0, rankedResults.length - 1);
         } else if (selectedIndex < 0 && rankedResults.length > 0) {
@@ -334,17 +335,20 @@ PlasmoidItem {
         }
     }
 
-    // Spotlight-style minimal popover: Mockup 1 search bar + icon/name list + Mockup 1 bottom bar
-    fullRepresentation: Item {
+    // Spotlight-style minimal popover: Mockup 1 440px frame with edge-to-edge dividers & full-bleed dark bottom bar
+    fullRepresentation: PlasmaExtras.Representation {
         id: popupRoot
 
-        readonly property int rowHeight: 38
-        readonly property int visibleRows: Math.max(1, Math.min(8, root.rankedResults.length))
+        collapseMarginsHint: true
 
-        implicitWidth: 400
-        implicitHeight: 38 + (visibleRows * rowHeight + (visibleRows - 1) * 2 + 12) + 32
-        Layout.minimumWidth: 360
-        Layout.preferredWidth: 400
+        readonly property int rowHeight: 38
+        readonly property int visibleRows: Math.max(1, Math.min(6, root.rankedResults.length))
+        readonly property int listHeight: visibleRows * rowHeight + (visibleRows - 1) * 2 + 16
+
+        implicitWidth: 440
+        implicitHeight: 48 + listHeight + 34
+        Layout.minimumWidth: 420
+        Layout.preferredWidth: 440
         Layout.minimumHeight: implicitHeight
         Layout.preferredHeight: implicitHeight
 
@@ -367,20 +371,18 @@ PlasmoidItem {
             }
         }
 
-        ColumnLayout {
-            anchors.fill: parent
+        contentItem: ColumnLayout {
             spacing: 0
 
-            // 1. Search Bar (38px inner + 10px dialog SVG top margin = 48px total, flush with list)
+            // 1. Mockup 1 Search Bar (48px, edge-to-edge bottom hairline)
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 38
+                Layout.preferredHeight: 48
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 6
-                    anchors.rightMargin: 6
-                    anchors.bottomMargin: 4
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 14
                     spacing: 10
 
                     Kirigami.Icon {
@@ -490,17 +492,17 @@ PlasmoidItem {
                     }
                 }
 
-                // Hairline bottom divider
+                // Edge-to-edge hairline divider
                 Rectangle {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
                     height: 1
-                    color: Qt.rgba(186 / 255, 210 / 255, 238 / 255, 0.10)
+                    color: Qt.rgba(186 / 255, 210 / 255, 238 / 255, 0.11)
                 }
             }
 
-            // 2. Minimal List Body (Just Icon + Name)
+            // 2. Minimal List Body (Just Icon + Name, up to 6 rows)
             Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -508,8 +510,10 @@ PlasmoidItem {
                 ListView {
                     id: resultsList
                     anchors.fill: parent
-                    anchors.topMargin: 6
-                    anchors.bottomMargin: 6
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+                    anchors.topMargin: 8
+                    anchors.bottomMargin: 8
                     spacing: 2
                     clip: true
                     interactive: contentHeight > height
@@ -617,11 +621,23 @@ PlasmoidItem {
                 }
             }
 
-            // 3. Seamless Bottom Bar (32px inner, transparent over dialog glass + subtle top hairline)
+            // 3. Mockup 1 Full-Bleed Darker Bottom Bar (34px, flat top + 10px rounded bottom corners)
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 32
+                Layout.preferredHeight: 34
+                clip: true
 
+                // Single clipped rectangle gives square top corners + 10px bottom corners matching dialog SVG
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: parent.height + 12
+                    radius: 10
+                    color: Qt.rgba(12 / 255, 16 / 255, 24 / 255, 0.45)
+                }
+
+                // Edge-to-edge top hairline divider
                 Rectangle {
                     anchors.left: parent.left
                     anchors.right: parent.right
@@ -632,9 +648,8 @@ PlasmoidItem {
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.topMargin: 6
-                    anchors.leftMargin: 4
-                    anchors.rightMargin: 2
+                    anchors.leftMargin: 14
+                    anchors.rightMargin: 10
                     spacing: 10
 
                     RowLayout {

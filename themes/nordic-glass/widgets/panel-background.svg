@@ -163,11 +163,12 @@
   <rect id="shadow-hint-left-inset" x="186" y="112" width="10" height="4" fill="#d08770"/>
   <rect id="shadow-hint-right-inset" x="200" y="112" width="10" height="4" fill="#d08770"/>
 
-  <!-- Content padding hints -->
+  <!-- Content padding hints (+ 1px rim inset on dialogs so collapseMarginsHint bleeds flush to the 1px border) -->
   <rect id="hint-top-margin" x="10" y="96" width="4" height="4" fill="#ebcb8b"/>
   <rect id="hint-bottom-margin" x="18" y="96" width="4" height="4" fill="#ebcb8b"/>
   <rect id="hint-left-margin" x="26" y="96" width="8" height="4" fill="#ebcb8b"/>
   <rect id="hint-right-margin" x="40" y="96" width="8" height="4" fill="#ebcb8b"/>
+
   <rect id="hint-stretch-borders" x="56" y="96" width="2" height="2" fill="#b48ead"/>
 
   <!-- Floating panel inset hints (10px margin) -->
