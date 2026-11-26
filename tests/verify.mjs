@@ -83,8 +83,8 @@ test("Global Theme (look-and-feel) and Wallpaper KPackages are valid", () => {
   assert.match(defaults, /Theme=nordic-icons/);
   assert.match(defaults, /name=nordic-glass/);
   assert.match(defaults, /Image=NordicMist/);
-  assert.match(defaults, /library=org\.kde\.breeze/);
-  assert.match(defaults, /theme=Breeze/);
+  assert.match(defaults, /library=org\.kde\.nordicborderless/);
+  assert.match(defaults, /theme=Nordic Borderless/);
 
   assert.ok(existsSync(join(lnfDir, "contents/previews/preview.png")));
   assert.ok(existsSync(join(lnfDir, "contents/previews/fullscreenpreview.jpg")));
@@ -287,43 +287,25 @@ test("Global Theme desktop-layout.js builds top floating bar + bottom autohide f
   assert.ok(Array.isArray(res2.created[1]._widgets[0]._cfg["General:launchers"]));
 });
 
-test("KWin 6 nordic-notitlebar script and /etc/xdg/kwinrc rounded-corner defaults are valid", () => {
-  const kwinDir = join(ROOT, "kwin/scripts/nordic-notitlebar");
-  const meta = JSON.parse(readFileSync(join(kwinDir, "metadata.json"), "utf8"));
-  assert.equal(meta.KPackageStructure, "KWin/Script");
-  assert.equal(meta.KPlugin?.Id, "nordic-notitlebar");
-  assert.equal(meta.KPlugin?.EnabledByDefault, true);
-  assert.equal(meta["X-Plasma-API"], "javascript");
+test("KWin 6 nordic-borderless KDecoration3 plugin and /etc/xdg/kwinrc defaults are valid", () => {
+  const decoDir = join(ROOT, "kwin/decorations/nordic-borderless");
+  const meta = JSON.parse(readFileSync(join(decoDir, "metadata.json"), "utf8"));
+  assert.equal(meta.KPlugin?.Id, "org.kde.nordicborderless");
+  assert.equal(meta["org.kde.kdecoration3"]?.recommendedBorderSize, "None");
 
-  const src = readFileSync(join(kwinDir, "contents/code/main.js"), "utf8");
-  let addedHandler = null;
-  const makeWin = (props) => ({
-    noBorder: false,
-    fullScreen: false,
-    fullScreenChanged: { connect: () => {} },
-    ...props,
-  });
-  const normal = makeWin({ normalWindow: true });
-  const dialog = makeWin({ dialog: true });
-  const dock = makeWin({ dock: true, normalWindow: false });
-  const addedNormal = makeWin({ normalWindow: true });
-
-  vm.runInNewContext(src, {
-    workspace: {
-      windowAdded: { connect: (fn) => { addedHandler = fn; } },
-      windowList: () => [normal, dialog, dock],
-    },
-  });
-  assert.equal(normal.noBorder, true);
-  assert.equal(dialog.noBorder, true);
-  assert.equal(dock.noBorder, false);
-  addedHandler(addedNormal);
-  assert.equal(addedNormal.noBorder, true);
+  const cpp = readFileSync(join(decoDir, "NordicBorderlessDecoration.cpp"), "utf8");
+  assert.match(cpp, /setBorders\(QMarginsF\(0\.0,\s*0\.0,\s*0\.0,\s*0\.0\)\)/);
+  assert.match(cpp, /setResizeOnlyBorders\(/);
+  assert.match(cpp, /K_PLUGIN_FACTORY_WITH_JSON/);
+  assert.ok(existsSync(join(decoDir, "CMakeLists.txt")));
 
   const kwinrc = readFileSync(join(ROOT, "kwin/kwinrc"), "utf8");
   assert.match(kwinrc, /^\[Plugins\]/m);
   assert.match(kwinrc, /^kwin4_effect_shapecornersEnabled=true$/m);
-  assert.match(kwinrc, /^nordic-notitlebarEnabled=true$/m);
+  assert.match(kwinrc, /^nordic-notitlebarEnabled=false$/m);
+  assert.match(kwinrc, /^\[org\.kde\.kdecoration2\]/m);
+  assert.match(kwinrc, /^library=org\.kde\.nordicborderless$/m);
+  assert.match(kwinrc, /^theme=Nordic Borderless$/m);
   assert.match(kwinrc, /^\[TabBox\]/m);
   assert.match(kwinrc, /^ApplicationsMode=1$/m);
   assert.match(kwinrc, /^DelayTime=0$/m);

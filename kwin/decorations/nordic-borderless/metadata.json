@@ -1,0 +1,11 @@
+{
+    "KPlugin": {
+        "Description": "Titlebar-free Nordic window decoration with invisible edge resize handles",
+        "Id": "org.kde.nordicborderless",
+        "Name": "Nordic Borderless"
+    },
+    "org.kde.kdecoration3": {
+        "blur": false,
+        "recommendedBorderSize": "None"
+    }
+}

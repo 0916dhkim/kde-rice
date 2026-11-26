@@ -2,8 +2,8 @@
 pkgname=kde-rice-git
 pkgver=0.1.0.r1.g0b94525
 pkgrel=1
-pkgdesc="Nordic Minimal Plasma 6 Global Theme, plasmoids, frosted glass style, adaptive switcher, lock screen, and auto-rebuilt KWin rounded-corners effect"
-arch=('any')
+pkgdesc="Nordic Minimal Plasma 6 Global Theme, plasmoids, frosted glass style, adaptive switcher, lock screen, SDDM, and titlebar-free KDecoration3 resize borders"
+arch=('x86_64')
 url="https://github.com/0916dhkim/kde-rice"
 license=('MIT' 'OFL-1.1' 'GPL-3.0-or-later')
 depends=(
@@ -12,6 +12,7 @@ depends=(
     'plasma-pa'
     'libksysguard'
     'kwin'
+    'kdecoration'
     'cmake'
     'extra-cmake-modules'
     'ninja'
@@ -27,6 +28,7 @@ depends=(
 makedepends=('git')
 provides=('kde-rice' 'kwin-effect-rounded-corners')
 conflicts=('kde-rice' 'kwin-effect-rounded-corners' 'kwin-effect-rounded-corners-git')
+options=('!debug')
 install=kde-rice.install
 source=("kde-rice::git+https://github.com/0916dhkim/kde-rice.git")
 sha256sums=('SKIP')
@@ -34,6 +36,15 @@ sha256sums=('SKIP')
 pkgver() {
     cd "$srcdir/kde-rice"
     printf "0.1.0.r%s.g%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+build() {
+    cmake -S "$srcdir/kde-rice/kwin/decorations/nordic-borderless" \
+          -B "$srcdir/build-nordic-borderless" \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX=/usr
+    cmake --build "$srcdir/build-nordic-borderless"
 }
 
 package() {
@@ -67,9 +78,8 @@ package() {
     install -Dm644 fonts/manrope/Manrope-*.ttf -t "$pkgdir/usr/share/fonts/nordic-manrope/"
     install -Dm644 fonts/manrope/OFL.txt "$pkgdir/usr/share/licenses/$pkgname/OFL-Manrope.txt"
 
-    # KWin 6 borderless windows script + system-wide XDG kwinrc/ksplashrc defaults
-    install -d "$pkgdir/usr/share/kwin/scripts"
-    cp -r kwin/scripts/nordic-notitlebar "$pkgdir/usr/share/kwin/scripts/"
+    # KWin 6 titlebar-free KDecoration3 plugin (0px titlebar + 8px invisible edge resize grips) + system-wide XDG kwinrc/ksplashrc defaults
+    DESTDIR="$pkgdir" cmake --install "$srcdir/build-nordic-borderless"
     install -Dm644 kwin/kwinrc "$pkgdir/etc/xdg/kwinrc"
     install -Dm644 kwin/ksplashrc "$pkgdir/etc/xdg/ksplashrc"
 

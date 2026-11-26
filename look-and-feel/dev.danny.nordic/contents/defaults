@@ -21,8 +21,8 @@ name=nordic-glass
 Image=NordicMist
 
 [kwinrc][org.kde.kdecoration2]
-library=org.kde.breeze
-theme=Breeze
+library=org.kde.nordicborderless
+theme=Nordic Borderless
 
 [kwinrc][TabBox]
 LayoutName=dev.danny.nordic

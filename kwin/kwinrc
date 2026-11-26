@@ -1,6 +1,11 @@
 [Plugins]
 kwin4_effect_shapecornersEnabled=true
-nordic-notitlebarEnabled=true
+nordic-notitlebarEnabled=false
+
+[org.kde.kdecoration2]
+BorderSize=None
+library=org.kde.nordicborderless
+theme=Nordic Borderless
 
 [TabBox]
 ApplicationsMode=1
