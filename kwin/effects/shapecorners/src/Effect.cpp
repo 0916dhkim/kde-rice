@@ -94,6 +94,12 @@ ShapeCorners::Effect::Effect()
         m_windowManager = std::make_unique<WindowManager>();
         // Connect the windowAdded signal to handle new windows.
         connect(KWin::effects, &KWin::EffectsHandler::windowAdded, this, &Effect::windowAdded);
+        // Temporary read-only diagnostic observer for windowActivated timing
+        connect(KWin::effects, &KWin::EffectsHandler::windowActivated, this, [this](KWin::EffectWindow *w) {
+            if (m_animation) {
+                m_animation->noteWindowActivated(w);
+            }
+        });
     }
 }
 

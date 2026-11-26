@@ -4,7 +4,14 @@
 
 #pragma once
 
+#include <QHash>
 #include <QPointer>
+#include <chrono>
+
+namespace KWin
+{
+    class EffectWindow;
+}
 
 namespace ShapeCorners
 {
@@ -30,6 +37,9 @@ namespace ShapeCorners
          */
         void update(Window &window);
 
+        /// Temporary diagnostic observer for KWin::EffectsHandler::windowActivated (read-only).
+        void noteWindowActivated(KWin::EffectWindow *w);
+
     private:
         /**
          * @brief Handles changes to the active window.
@@ -44,5 +54,14 @@ namespace ShapeCorners
         /// Pointer to the last active window, only used to detect changes.
         /// QPointer automatically becomes null when the Window is deleted.
         QPointer<Window> lastActiveWindow;
+
+        struct DiagState {
+            std::chrono::steady_clock::time_point lastFrame;
+            int frameCount = 0;
+            bool hasLastFrame = false;
+        };
+        std::chrono::steady_clock::time_point lastActivateSignalTime{};
+        bool hasActivateSignal = false;
+        QHash<const Window *, DiagState> diagByWindow;
     };
 } // namespace ShapeCorners
