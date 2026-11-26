@@ -326,7 +326,10 @@ test("KWin 6 nordic-notitlebar script and /etc/xdg/kwinrc rounded-corner default
   assert.match(kwinrc, /^nordic-notitlebarEnabled=true$/m);
   assert.match(kwinrc, /^\[Round-Corners\]/m);
   assert.match(kwinrc, /^Size=12$/m);
-  assert.match(kwinrc, /^OutlineColor=136,192,208$/m);
+  assert.match(kwinrc, /^OutlineColor=163,190,140$/m);
+  assert.match(kwinrc, /^ActiveOutlineAlpha=235$/m);
+  assert.match(kwinrc, /^InactiveOutlineColor=136,192,208$/m);
+  assert.match(kwinrc, /^InactiveOutlineAlpha=108$/m);
   assert.match(kwinrc, /^UseNativeDecorationShadows=false$/m);
 });
 
