@@ -34,7 +34,7 @@ Rectangle {
         property: "progress"
         from: 0.0
         to: 1.0
-        duration: 3500
+        duration: 1200
         easing.type: Easing.InOutQuad
     }
 
@@ -76,8 +76,8 @@ Rectangle {
         property variant texB: sourceB
         property real u_progress: root.progress
         property real u_aspect: root.height > 0 ? (root.width / root.height) : 1.5
-        property real u_centerX: 0.50
-        property real u_centerY: 0.74
+        property real u_centerX: 0.68
+        property real u_centerY: 0.62
         property real u_sigma: 0.15
         property real u_waveFreq: 5.0
         property real u_pushAmt: 0.145
