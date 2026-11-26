@@ -414,6 +414,16 @@ test("launcher fuzzy/acronym/frecency matcher ranks and highlights accurately", 
   assert.equal(escaped[0].id, "app:xss");
   assert.ok(!escaped[0].displayHtml.includes("<Test>"), "must HTML-escape app names");
   assert.match(escaped[0].displayHtml, /&amp;.*&lt;/);
+
+  assert.equal(
+    sandbox.normalizeDesktopId("applications:com.mitchellh.ghostty.desktop"),
+    "com.mitchellh.ghostty"
+  );
+  assert.equal(
+    sandbox.normalizeDesktopId("file:///usr/share/applications/google-chrome.desktop?iconData=abc"),
+    "google-chrome"
+  );
+  assert.equal(sandbox.normalizeDesktopId("org.kde.dolphin"), "org.kde.dolphin");
 });
 
 test("bundled Manrope static fonts and SIL OFL 1.1 license are present", () => {

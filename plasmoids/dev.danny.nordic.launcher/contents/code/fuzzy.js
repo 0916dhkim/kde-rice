@@ -1,5 +1,27 @@
 .pragma library
 
+function normalizeDesktopId(raw) {
+    let s = String(raw || "").trim().toLowerCase();
+    if (!s) {
+        return "";
+    }
+    const qIdx = s.indexOf("?");
+    if (qIdx >= 0) {
+        s = s.slice(0, qIdx);
+    }
+    const slash = s.lastIndexOf("/");
+    if (slash >= 0) {
+        s = s.slice(slash + 1);
+    }
+    if (s.indexOf("applications:") === 0) {
+        s = s.slice("applications:".length);
+    }
+    if (s.endsWith(".desktop")) {
+        s = s.slice(0, -".desktop".length);
+    }
+    return s;
+}
+
 function escapeHtml(text) {
     return String(text || "")
         .replace(/&/g, "&amp;")
@@ -181,6 +203,7 @@ function rankItems(items, query, launchCounts, maxResults) {
             displayHtml: formatHighlighted(entry.item.name, entry.indices),
             icon: entry.item.icon,
             kind: entry.item.kind,
+            favId: entry.item.favId || "",
             appRow: entry.item.appRow !== undefined ? entry.item.appRow : -1,
             actionId: entry.item.actionId || "",
             command: entry.item.command || "",

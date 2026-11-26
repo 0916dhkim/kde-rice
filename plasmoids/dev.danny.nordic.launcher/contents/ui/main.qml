@@ -10,6 +10,7 @@ import org.kde.plasma.extras as PlasmaExtras
 import org.kde.plasma.plasma5support as Plasma5Support
 import org.kde.plasma.private.kicker as Kicker
 import org.kde.plasma.private.sessions as Sessions
+import org.kde.taskmanager as TaskManager
 import org.kde.kirigami as Kirigami
 import "../code/fuzzy.js" as Fuzzy
 
@@ -108,6 +109,16 @@ PlasmoidItem {
 
     Sessions.SessionManagement {
         id: sessionMgmt
+    }
+
+    // Tracks open windows across all virtual desktops so Enter focuses an existing app instead of spawning duplicates
+    TaskManager.TasksModel {
+        id: tasksModel
+        groupMode: TaskManager.TasksModel.GroupDisabled
+        filterByVirtualDesktop: false
+        filterByScreen: false
+        filterByActivity: true
+        filterHidden: true
     }
 
     Plasma5Support.DataSource {
@@ -214,6 +225,7 @@ PlasmoidItem {
                 id: key,
                 name: name,
                 icon: icon,
+                favId: favId,
                 keywords: desc + " " + favId,
                 kind: "app",
                 appRow: row,
@@ -287,7 +299,50 @@ PlasmoidItem {
         }
     }
 
-    function activateResult(index: int): void {
+    function focusExistingWindow(favId: string, appName: string): bool {
+        const targetId = Fuzzy.normalizeDesktopId(favId);
+        const targetName = String(appName || "").trim().toLowerCase();
+        const total = tasksModel.count;
+        let fallbackRow = -1;
+
+        for (let i = 0; i < total; ++i) {
+            const idx = tasksModel.makeModelIndex(i);
+            if (!tasksModel.data(idx, TaskManager.AbstractTasksModel.IsWindow)) {
+                continue;
+            }
+            const winLauncher = Fuzzy.normalizeDesktopId(
+                tasksModel.data(idx, TaskManager.AbstractTasksModel.LauncherUrlWithoutIcon)
+            );
+            const winAppId = Fuzzy.normalizeDesktopId(
+                tasksModel.data(idx, TaskManager.AbstractTasksModel.AppId)
+            );
+            const winName = String(
+                tasksModel.data(idx, TaskManager.AbstractTasksModel.AppName) || ""
+            ).trim().toLowerCase();
+
+            const idMatch = targetId.length > 0 && (winLauncher === targetId || winAppId === targetId);
+            const nameMatch = targetName.length > 0 && winName === targetName;
+
+            if (idMatch || nameMatch) {
+                const isActive = Boolean(tasksModel.data(idx, TaskManager.AbstractTasksModel.IsActive));
+                if (!isActive) {
+                    tasksModel.requestActivate(idx);
+                    return true;
+                }
+                if (fallbackRow < 0) {
+                    fallbackRow = i;
+                }
+            }
+        }
+
+        if (fallbackRow >= 0) {
+            tasksModel.requestActivate(tasksModel.makeModelIndex(fallbackRow));
+            return true;
+        }
+        return false;
+    }
+
+    function activateResult(index: int, forceNewWindow: bool): void {
         if (index < 0 || index >= rankedResults.length) {
             return;
         }
@@ -296,6 +351,9 @@ PlasmoidItem {
         closeLauncher();
 
         if (entry.kind === "app" && entry.appRow >= 0 && root.allAppsModel) {
+            if (!forceNewWindow && focusExistingWindow(entry.favId, entry.name)) {
+                return;
+            }
             root.allAppsModel.trigger(entry.appRow, "", null);
         } else if (entry.kind === "session") {
             runSessionAction(entry.actionId);
@@ -456,12 +514,12 @@ PlasmoidItem {
                                 }
 
                                 Keys.onReturnPressed: function(event) {
-                                    root.activateResult(root.selectedIndex);
+                                    root.activateResult(root.selectedIndex, Boolean(event.modifiers & Qt.ControlModifier));
                                     event.accepted = true;
                                 }
 
                                 Keys.onEnterPressed: function(event) {
-                                    root.activateResult(root.selectedIndex);
+                                    root.activateResult(root.selectedIndex, Boolean(event.modifiers & Qt.ControlModifier));
                                     event.accepted = true;
                                 }
 
@@ -612,7 +670,9 @@ PlasmoidItem {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onEntered: root.selectedIndex = rowItem.index
-                                onClicked: root.activateResult(rowItem.index)
+                                onClicked: function(mouse) {
+                                    root.activateResult(rowItem.index, Boolean(mouse.modifiers & Qt.ControlModifier));
+                                }
                             }
                         }
                     }
