@@ -45,6 +45,8 @@ PlasmoidItem {
     readonly property bool hasBattery: batteryModel.hasBatteries
     readonly property int batPct: Math.max(0, Math.min(100, batteryModel.percent))
     readonly property bool batPluggedIn: batteryModel.pluggedIn
+    readonly property bool batCharging: batteryModel.state === BatteryControl.BatteryControlModel.Charging
+    readonly property bool batFull: batteryModel.state === BatteryControl.BatteryControlModel.FullyCharged
     readonly property color batColor: {
         if (batPluggedIn) {
             return "#88c0d0";
@@ -202,8 +204,10 @@ PlasmoidItem {
                 mainText: "Battery " + root.batPct + "%"
                 subText: {
                     const rem = root.formatRemaining(batteryModel.smoothedRemainingMsec);
-                    const state = root.batPluggedIn ? "Plugged in" : "On battery";
-                    return state + (rem ? (" · " + rem + " remaining") : "");
+                    const state = root.batCharging
+                        ? "Charging"
+                        : (root.batFull ? "Fully charged" : (root.batPluggedIn ? "Plugged in" : "On battery"));
+                    return state + (rem ? (" · " + rem + (root.batCharging ? " until full" : " remaining")) : "");
                 }
 
                 RowLayout {
@@ -213,12 +217,12 @@ PlasmoidItem {
 
                     Item {
                         implicitWidth: 21
-                        implicitHeight: 12
+                        implicitHeight: 14
                         Layout.alignment: Qt.AlignVCenter
 
                         Rectangle {
                             x: 0
-                            y: 0
+                            y: 1
                             width: 18
                             height: 12
                             radius: 3
@@ -238,11 +242,25 @@ PlasmoidItem {
 
                         Rectangle {
                             x: 19.2
-                            y: 3.8
+                            y: 4.8
                             width: 1.8
                             height: 4.4
                             radius: 0.9
                             color: root.batColor
+                        }
+
+                        // Crisp macOS-style charging lightning bolt with dark halo knockout
+                        Image {
+                            visible: root.batCharging
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.horizontalCenterOffset: -1.5
+                            anchors.verticalCenter: parent.verticalCenter
+                            source: Qt.resolvedUrl("icons/bolt.svg")
+                            sourceSize.width: 12
+                            sourceSize.height: 14
+                            width: 11
+                            height: 13
+                            smooth: true
                         }
                     }
 
