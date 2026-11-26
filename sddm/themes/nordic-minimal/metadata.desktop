@@ -1,0 +1,13 @@
+[SddmGreeterTheme]
+Name=Nordic Minimal
+Description=Centered Midnight Horizon Nordic SDDM theme over Icelandic Volcanic Ring Road
+Author=Danny Kim
+Copyright=(c) 2026 Danny Kim
+License=MIT
+Type=sddm-theme
+Version=1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=nordic-minimal
+Theme-API=2.0
+QtVersion=6

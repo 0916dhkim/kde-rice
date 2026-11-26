@@ -90,6 +90,11 @@ package() {
         "$pkgdir/usr/lib/systemd/user/plasma-kwin_wayland.service.d/nordic-lockscreen.conf"
     install -Dm644 kscreenlocker/kscreenlockerrc "$pkgdir/etc/xdg/kscreenlockerrc"
 
+    # Centered Midnight Horizon SDDM Qt6 theme (#11 Icelandic Volcanic Ring Road + Wayland HiDPI drop-in)
+    install -d "$pkgdir/usr/share/sddm/themes"
+    cp -r sddm/themes/nordic-minimal "$pkgdir/usr/share/sddm/themes/"
+    install -Dm644 sddm/z-nordic-minimal.conf "$pkgdir/etc/sddm.conf.d/z-nordic-minimal.conf"
+
     # Normalize permissions cleanly for system installation (preserve symlinks)
     find "$pkgdir/usr/share" -type d -exec chmod 755 {} +
     find "$pkgdir/usr/share" -type f ! -type l -exec chmod 644 {} +

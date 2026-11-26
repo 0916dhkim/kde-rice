@@ -498,6 +498,19 @@ test("Editorial Nordic Minimal lock screen shell package and KWin drop-in are va
   assert.ok(statSync(join(splashDir, "shaders/ripple.frag.qsb")).size > 500, "ripple.frag.qsb unexpectedly tiny");
   const ksplashrc = readFileSync(join(ROOT, "kwin/ksplashrc"), "utf8");
   assert.match(ksplashrc, /^Theme=dev\.danny\.nordic$/m);
+
+  const sddmDir = join(ROOT, "sddm/themes/nordic-minimal");
+  const sddmMeta = readFileSync(join(sddmDir, "metadata.desktop"), "utf8");
+  assert.match(sddmMeta, /^QtVersion=6$/m);
+  assert.match(sddmMeta, /^MainScript=Main\.qml$/m);
+  const sddmQml = readFileSync(join(sddmDir, "Main.qml"), "utf8");
+  assert.match(sddmQml, /sddm\.login\(/);
+  assert.match(sddmQml, /userModel/);
+  assert.match(sddmQml, /sessionModel/);
+  assert.ok(!/font\.pixelSize\s*:\s*\d+\.\d+/.test(sddmQml), "SDDM Main.qml must use integer font.pixelSize");
+  const sddmConf = readFileSync(join(ROOT, "sddm/z-nordic-minimal.conf"), "utf8");
+  assert.match(sddmConf, /^Current=nordic-minimal$/m);
+  assert.match(sddmConf, /^DisplayServer=wayland$/m);
 });
 
 test("PKGBUILD and .SRCINFO are valid and consistent", () => {
