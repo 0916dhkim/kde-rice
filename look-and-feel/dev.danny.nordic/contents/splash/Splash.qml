@@ -34,7 +34,7 @@ Rectangle {
         property: "progress"
         from: 0.0
         to: 1.0
-        duration: 920
+        duration: 3500
         easing.type: Easing.InOutQuad
     }
 
