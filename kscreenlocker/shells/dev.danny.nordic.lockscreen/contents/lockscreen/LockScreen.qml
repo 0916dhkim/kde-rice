@@ -441,7 +441,7 @@ Item {
                                     }
                                 }
                                 onAccepted: root.submitPassword()
-                                Keys.onEscapePressed: {
+                                Keys.onEscapePressed: function(event) {
                                     root.clearPassword();
                                     // Let kscreenlocker_greet handle DPMS off on Esc
                                     event.accepted = false;
@@ -525,8 +525,10 @@ Item {
                 property bool destructive: false
                 signal triggered()
 
-                width: 36
-                height: 36
+                implicitWidth: 36
+                implicitHeight: 36
+                Layout.preferredWidth: 36
+                Layout.preferredHeight: 36
                 radius: 10
                 color: pMouse.containsMouse
                     ? (pbtn.destructive
@@ -577,7 +579,7 @@ Item {
                 visible: sessionManagement.canReboot
                 iconFile: "icons/restart.svg"
                 labelText: "Restart"
-                onTriggered: sessionManagement.reboot()
+                onTriggered: sessionManagement.requestReboot(SessionManagement.ConfirmationMode.Skip)
             }
 
             PowerBtn {
@@ -585,7 +587,7 @@ Item {
                 iconFile: "icons/power.svg"
                 labelText: "Shut Down"
                 destructive: true
-                onTriggered: sessionManagement.shutdown()
+                onTriggered: sessionManagement.requestShutdown(SessionManagement.ConfirmationMode.Skip)
             }
 
             Text {
