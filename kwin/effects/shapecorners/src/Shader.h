@@ -35,6 +35,12 @@ namespace ShapeCorners
         explicit Shader();
 
         /**
+         * @brief Hot-reloads the GLSL fragment shader from disk. Keeps the previous shader if compilation fails.
+         * @return True if the newly loaded shader is valid.
+         */
+        bool Reload();
+
+        /**
          * @brief Checks if the shader is valid and loaded.
          * \return True if the shader is valid and loaded
          */

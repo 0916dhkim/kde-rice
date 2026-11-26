@@ -18,12 +18,8 @@ depends=(
     'ninja'
     'gcc'
     'pkgconf'
-    'gettext'
     'vulkan-headers'
     'libepoxy'
-    'kconfigwidgets'
-    'ki18n'
-    'kcmutils'
 )
 makedepends=('git')
 provides=('kde-rice' 'kwin-effect-rounded-corners')

@@ -1,4 +1,4 @@
-File=kcm/options.kcfg
+File=options.kcfg
 NameSpace=ShapeCorners
 ClassName=Config
 Singleton=true

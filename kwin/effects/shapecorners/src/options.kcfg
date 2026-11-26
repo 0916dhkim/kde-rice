@@ -324,5 +324,8 @@
         <entry name="DisableOutlineFullScreen" type="Bool">
             <default>true</default>
         </entry>
+        <entry name="DebugTimings" type="Bool">
+            <default>false</default>
+        </entry>
     </group>
 </kcfg>

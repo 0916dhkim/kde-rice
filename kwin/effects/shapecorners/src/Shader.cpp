@@ -41,31 +41,33 @@ namespace
 
 ShapeCorners::Shader::Shader()
 {
+    Reload();
+}
 
+bool ShapeCorners::Shader::Reload()
+{
     qInfo() << "ShapeCorners: loading shaders...";
 
-    // KWin 6.7 Wayland requires the core-profile shader directly. KWin X11 keeps the older
-    // effect API and still selects the _core variant itself based on the OpenGL context.
 #if KWIN_EFFECT_API_VERSION >= 237 && KWIN_PLUGIN_VERSION_NUM >= QT_VERSION_CHECK(6, 7, 0)
     const auto shaderFileName = QStringLiteral("shapecorners_core.frag");
 #else
     const auto shaderFileName = QStringLiteral("shapecorners.frag");
 #endif
 
-#ifdef KWIN_X11
-    const QString shaderFileRelativePath = QStringLiteral("kwin-x11/shaders/") + shaderFileName;
-#else
     const QString shaderFileRelativePath = QStringLiteral("kwin/shaders/") + shaderFileName;
-#endif
-
-    // Locate the shader file in the standard data locations
     const QString shaderFilePath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, shaderFileRelativePath);
-    // Generate the shader from file using the ShaderManager
-    m_shader = KWin::ShaderManager::instance()->generateShaderFromFile(kShaderTraits, QString(), shaderFilePath);
-    if (!IsValid()) {
-        qCritical() << "ShapeCorners: no valid shaders found! effect will not work.";
-        return;
+    auto nextShader = KWin::ShaderManager::instance()->generateShaderFromFile(kShaderTraits, QString(), shaderFilePath);
+#if KWIN_EFFECT_API_VERSION >= 237 && KWIN_PLUGIN_VERSION_NUM >= QT_VERSION_CHECK(6, 6, 80)
+    const bool ok = (nextShader != nullptr);
+#else
+    const bool ok = (nextShader != nullptr && nextShader->isValid());
+#endif
+    if (!ok) {
+        qCritical() << "ShapeCorners: failed to compile shader from" << shaderFilePath;
+        return false;
     }
+
+    m_shader = std::move(nextShader);
 
     // Assign uniform variable locations
     m_shader_windowSize             = m_shader->uniformLocation("windowSize");
@@ -91,6 +93,7 @@ ShapeCorners::Shader::Shader()
     m_shader_outerOutlineThickness  = m_shader->uniformLocation("outerOutlineThickness");
     m_shader_front                  = m_shader->uniformLocation("front");
     qInfo() << "ShapeCorners: shaders loaded.";
+    return true;
 }
 
 bool ShapeCorners::Shader::IsValid() const

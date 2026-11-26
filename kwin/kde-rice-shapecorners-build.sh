@@ -38,7 +38,7 @@ fi
 install -d -m 755 "$STATE_DIR"
 # Remove any stale files from an older manifest that are no longer installed
 if [ -f "$MANIFEST" ]; then
-    while IFS= read -r old_file; do
+    while IFS= read -r old_file || [ -n "$old_file" ]; do
         [ -n "$old_file" ] || continue
         if ! grep -Fxq "$old_file" "$BUILD_DIR/build/install_manifest.txt"; then
             rm -f "$old_file"

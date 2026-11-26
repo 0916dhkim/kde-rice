@@ -1,7 +1,3 @@
-//
-// Created by matin on 8/3/25.
-//
-
 #pragma once
 
 #include <QHash>
@@ -16,43 +12,30 @@ namespace KWin
 namespace ShapeCorners
 {
     class Window;
+    class WindowManager;
+
     /**
-     * @brief Manages animation state and configuration for window corner effects.
-     *
-     * Handles the transition between active and inactive window configurations,
-     * updating animation progress and responding to window activation changes.
+     * @brief Manages active/inactive border & shadow transitions with proper KWin repaint scheduling.
      */
     class Animation
     {
     public:
-        /**
-         * @brief Initializes the animation state and connects activation signals.
-         */
         Animation();
 
-        /**
-         * @brief Updates the animation state and interpolates configurations.
-         * @param window The Window object to update.
-         * Should be called regularly to progress the animation.
-         */
+        /// Called directly from KWin::EffectsHandler::windowActivated.
+        void onWindowActivated(KWin::EffectWindow *kwindow);
+
+        /// Updates interpolated visual config for a window during prePaintWindow.
         void update(Window &window);
 
-        /// Temporary diagnostic observer for KWin::EffectsHandler::windowActivated (read-only).
-        void noteWindowActivated(KWin::EffectWindow *w);
+        /// Schedules next-frame repaints during postPaintScreen for all currently animating windows.
+        void schedulePostPaintRepaints(const WindowManager &windowManager);
 
     private:
-        /**
-         * @brief Handles changes to the active window.
-         * @param window The newly activated EffectWindow. Null if no window is active.
-         */
         void setActiveWindowChanged(Window *window);
+        void startWindowAnimation(Window *window, std::chrono::steady_clock::time_point now, int durationMs);
 
-        /// Pointer to the current active window, only used to detect changes.
-        /// QPointer automatically becomes null when the Window is deleted.
         QPointer<Window> currentActiveWindow;
-
-        /// Pointer to the last active window, only used to detect changes.
-        /// QPointer automatically becomes null when the Window is deleted.
         QPointer<Window> lastActiveWindow;
 
         struct DiagState {

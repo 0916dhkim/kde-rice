@@ -63,13 +63,13 @@ namespace ShapeCorners
         bool isMaximized = false;
 
         /// Duration remaining for the current animation, in milliseconds.
-        long lastAnimationDuration;
+        long lastAnimationDuration = 0;
 
         /// Whether an animation is currently running.
-        bool isAnimating = true;
+        bool isAnimating = false;
 
-        /// Timestamp of the last active window change.
-        std::chrono::system_clock::time_point lastActiveChangedTime;
+        /// Monotonic timestamp of the last active window change.
+        std::chrono::steady_clock::time_point lastActiveChangedTime{};
 
         /**
          * @brief Current window configuration that may be animated.
