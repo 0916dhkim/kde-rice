@@ -486,6 +486,18 @@ test("Editorial Nordic Minimal lock screen shell package and KWin drop-in are va
 
   const lockrc = readFileSync(join(ROOT, "kscreenlocker/kscreenlockerrc"), "utf8");
   assert.match(lockrc, /NordicMist/);
+
+  const splashDir = join(ROOT, "look-and-feel/dev.danny.nordic/contents/splash");
+  const splashQml = readFileSync(join(splashDir, "Splash.qml"), "utf8");
+  assert.match(splashQml, /ShaderEffect/);
+  assert.match(splashQml, /ripple\.frag\.qsb/);
+  assert.match(splashQml, /splash-start\.jpg/);
+  assert.ok(existsSync(join(splashDir, "splash-start.jpg")), "missing splash-start.jpg");
+  assert.ok(existsSync(join(splashDir, "shaders/ripple.frag")), "missing ripple.frag");
+  assert.ok(existsSync(join(splashDir, "shaders/ripple.frag.qsb")), "missing compiled ripple.frag.qsb");
+  assert.ok(statSync(join(splashDir, "shaders/ripple.frag.qsb")).size > 500, "ripple.frag.qsb unexpectedly tiny");
+  const ksplashrc = readFileSync(join(ROOT, "kwin/ksplashrc"), "utf8");
+  assert.match(ksplashrc, /^Theme=dev\.danny\.nordic$/m);
 });
 
 test("PKGBUILD and .SRCINFO are valid and consistent", () => {

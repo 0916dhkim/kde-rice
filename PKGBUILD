@@ -67,10 +67,11 @@ package() {
     install -Dm644 fonts/manrope/Manrope-*.ttf -t "$pkgdir/usr/share/fonts/nordic-manrope/"
     install -Dm644 fonts/manrope/OFL.txt "$pkgdir/usr/share/licenses/$pkgname/OFL-Manrope.txt"
 
-    # KWin 6 borderless windows script + system-wide XDG kwinrc defaults (rounded corners + outlines + shadows + switcher)
+    # KWin 6 borderless windows script + system-wide XDG kwinrc/ksplashrc defaults
     install -d "$pkgdir/usr/share/kwin/scripts"
     cp -r kwin/scripts/nordic-notitlebar "$pkgdir/usr/share/kwin/scripts/"
     install -Dm644 kwin/kwinrc "$pkgdir/etc/xdg/kwinrc"
+    install -Dm644 kwin/ksplashrc "$pkgdir/etc/xdg/ksplashrc"
 
     # DKMS-style vendored KDE-Rounded-Corners (shapecorners) source + PostTransaction rebuild hook on kwin updates
     install -d "$pkgdir/usr/src/kde-rice-shapecorners"

@@ -29,3 +29,7 @@ LayoutName=dev.danny.nordic
 ApplicationsMode=1
 DelayTime=0
 HighlightWindows=false
+
+[ksplashrc][KSplash]
+Engine=KSplashQML
+Theme=dev.danny.nordic
